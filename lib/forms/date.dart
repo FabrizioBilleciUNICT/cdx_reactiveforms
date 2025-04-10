@@ -1,7 +1,7 @@
 
-import 'package:cdx_components/injector.dart';
-import 'package:cdx_components/utils/extensions.dart';
+import 'package:cdx_core/injector.dart';
 import 'package:cdx_reactiveforms/forms/text.dart';
+import 'package:cdx_reactiveforms/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import '../models/types.dart';
 import 'package:intl/intl.dart';

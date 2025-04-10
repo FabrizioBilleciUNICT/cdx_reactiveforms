@@ -11,8 +11,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-  cdx_components:
-    path: ../cdxcomponents
+  intl: ^0.20.2
+  cdx_core:
+    path: ../cdx_core
 
 dev_dependencies:
   flutter_test:

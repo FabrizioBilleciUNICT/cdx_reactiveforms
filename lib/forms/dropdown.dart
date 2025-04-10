@@ -1,7 +1,7 @@
 
-import 'package:cdx_components/core/models/input_theme_data.dart';
-import 'package:cdx_components/injector.dart';
-import 'package:cdx_reactiveforms/theme/theme_utils.dart';
+import 'package:cdx_core/core/models/input_theme_data.dart';
+import 'package:cdx_core/injector.dart';
+import 'package:cdx_reactiveforms/ui/components.dart';
 import 'package:flutter/material.dart';
 import '../models/dropdown_item.dart';
 import '../models/iform.dart';
@@ -109,7 +109,7 @@ class DropdownForm<K> extends IForm<K, K> {
     );
   }
 
-  Widget labelWidget() => ThemeUtils.label(label, theme);
+  Widget labelWidget() => FormComponents.label(label, theme);
 
   Widget input(List<DropdownItem<K>> items) {
     return DropdownButtonFormField<K>(
@@ -120,7 +120,7 @@ class DropdownForm<K> extends IForm<K, K> {
         changeValue(newValue);
       } : null,
       hint: Text(hint, style: DI.theme().inputTheme.hintStyle),
-      decoration: ThemeUtils.inputDecoration(theme, hint, editable),
+      decoration: FormComponents.inputDecoration(theme, hint, editable),
       items: items.map((DropdownItem<K> item) {
         return DropdownMenuItem<K>(
           value: item.value,

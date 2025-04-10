@@ -1,8 +1,8 @@
 
-import 'package:cdx_components/core/models/input_theme_data.dart';
+import 'package:cdx_core/core/models/input_theme_data.dart';
 import 'package:flutter/material.dart';
 
-abstract class ThemeUtils {
+abstract class FormComponents {
 
   static Widget label(String label, CdxInputThemeData theme) {
     if (label.isEmpty) return const SizedBox();

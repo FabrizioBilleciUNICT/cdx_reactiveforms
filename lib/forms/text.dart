@@ -1,7 +1,7 @@
 
-import 'package:cdx_components/core/models/input_theme_data.dart';
-import 'package:cdx_components/injector.dart';
-import 'package:cdx_reactiveforms/theme/theme_utils.dart';
+import 'package:cdx_core/core/models/input_theme_data.dart';
+import 'package:cdx_core/injector.dart';
+import 'package:cdx_reactiveforms/ui/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -113,7 +113,7 @@ class TextForm<K> extends IForm<String, K> {
     );
   }
 
-  Widget labelWidget() => ThemeUtils.label(label, theme);
+  Widget labelWidget() => FormComponents.label(label, theme);
 
   Widget input(BuildContext context) {
     return Row(
@@ -132,7 +132,7 @@ class TextForm<K> extends IForm<String, K> {
             cursorColor: theme.cursorColor,
             style: theme.textStyle,
             showCursor: editable && type != FormsType.date,
-            decoration: ThemeUtils.inputDecoration(theme, hint, editable).copyWith(
+            decoration: FormComponents.inputDecoration(theme, hint, editable).copyWith(
               suffix: suffix(changeValue),
               prefix: prefix(changeValue),
             ),

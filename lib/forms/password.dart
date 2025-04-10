@@ -1,6 +1,6 @@
 
-import 'package:cdx_components/injector.dart';
-import 'package:cdx_components/utils/extensions.dart';
+import 'package:cdx_core/injector.dart';
+import 'package:cdx_core/utils/extensions.dart';
 import 'package:cdx_reactiveforms/forms/text.dart';
 import 'package:flutter/material.dart';
 
