@@ -1,10 +1,10 @@
 
 import 'package:cdx_core/injector.dart';
+import 'package:cdx_core/utils/date_utils.dart';
+import 'package:cdx_core/utils/extensions.dart';
 import 'package:cdx_reactiveforms/forms/text.dart';
-import 'package:cdx_reactiveforms/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import '../models/types.dart';
-import 'package:intl/intl.dart';
 
 
 class DateForm extends TextForm<DateTime> {
@@ -60,9 +60,7 @@ class DateForm extends TextForm<DateTime> {
 
   @override
   DateTime? inputTransform(String? input) {
-    final formatter = DateFormat(outputFormat);
-    final date = formatter.tryParse(input ?? '');
-    return date;
+    return DatesUtils.parse(input, outputFormat);
   }
 
   @override
