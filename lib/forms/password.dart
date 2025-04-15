@@ -4,28 +4,35 @@ import 'package:cdx_core/utils/extensions.dart';
 import 'package:cdx_reactiveforms/forms/text.dart';
 import 'package:flutter/material.dart';
 
+import '../models/types.dart';
+
 class PasswordForm extends TextForm<String> {
+
+  final String messageError;
 
   PasswordForm({
     required super.hint,
     required super.label,
-    required super.type,
-    required super.labelInfo,
-    required super.required,
-    required super.editable,
-    required super.errorNotifier,
-    required super.visible,
+    super.type = FormsType.password,
+    super.labelInfo,
+    super.isRequired,
+    super.editable,
+    super.visible,
     required super.initialValue,
     super.minValue = '',
     super.maxValue = '',
+    required this.messageError,
+    super.onChange,
   }) : super(
+      errorNotifier: ValueNotifier(''),
       formatters: [],
-      inputType: TextInputType.text
+      inputType: TextInputType.text,
+      initialHideText: true
   );
 
   @override
   bool validate(String? value) {
-    return super.validate(value) && value?.isValidPassword() == true;
+    return !isRequired || (super.validate(value) && value?.isValidPassword() == true);
   }
 
   @override
@@ -36,6 +43,28 @@ class PasswordForm extends TextForm<String> {
           color: DI.colors().primary
       ),
     );
+  }
+
+  @override
+  Widget suffix(void Function(String p1) onAction) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: InkWell(
+        onTap: () {
+          hideText.value = !hideText.value;
+        },
+        child: Icon(hideText.value
+            ? Icons.visibility_off_rounded
+            : Icons.visibility_rounded,
+            color: DI.colors().primary
+        ),
+      ),
+    );
+  }
+
+  @override
+  String errorMessage(String? value) {
+    return messageError;
   }
 
 }

@@ -26,6 +26,8 @@ abstract class FormComponents {
     return InputDecoration(
       contentPadding: theme.contentPadding,
       filled: true,
+      isDense: false,
+      isCollapsed: true,
       fillColor: !editable
           ? theme.disabledBackgroundColor
           : theme.backgroundColor,

@@ -2,6 +2,7 @@
 
 enum FormsType {
   text,           //
+  email,          //
   password,       //
   multiline,      //
   number,         //

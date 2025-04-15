@@ -18,13 +18,15 @@ class TextForm<K> extends IForm<String, K> {
   final int? minLines;
   final int? maxLines;
   late final CdxInputThemeData theme;
+  final void Function(String?)? onChange;
+  late final ValueNotifier<bool> hideText;
 
   TextForm({
     required super.hint,
     required super.label,
     super.type = FormsType.text,
     super.labelInfo = false,
-    super.required = false,
+    super.isRequired = true,
     super.editable = true,
     super.visible = true,
     super.minValue,
@@ -37,15 +39,23 @@ class TextForm<K> extends IForm<String, K> {
     this.minLines,
     this.maxLines,
     ValueNotifier<String>? errorNotifier,
+    ValueNotifier<bool>? showErrorNotifier,
     CdxInputThemeData? themeData,
-  }) : super(errorNotifier: errorNotifier ?? ValueNotifier('')) {
+    bool initialHideText = false,
+    this.onChange,
+  }) : super(
+    errorNotifier: errorNotifier ?? ValueNotifier(''),
+    showErrorNotifier: showErrorNotifier ?? ValueNotifier(false),
+    valueNotifier: ValueNotifier(initialValue),
+  ) {
     _controller = TextEditingController(text: outputTransform(initialValue));
     _initialValue = outputTransform(initialValue) ?? '';
+    hideText = ValueNotifier(initialHideText);
     theme = themeData ?? DI.theme().inputTheme;
   }
 
-  Widget suffix(void Function(String) onAction) => const SizedBox();
-  Widget prefix(void Function(String) onAction) => const SizedBox();
+  Widget? suffix(void Function(String) onAction) => null;
+  Widget? prefix(void Function(String) onAction) => null;
 
   @override
   K? inputTransform(String? input) {
@@ -59,19 +69,22 @@ class TextForm<K> extends IForm<String, K> {
 
   @override
   void listener(String? value) {
+    showError(false);
     final bool valid = validate(value);
     if (!valid) {
-      errorNotifier.value = 'Errore';
+      errorNotifier.value = errorMessage(value);
     }
     else {
       errorNotifier.value = '';
     }
+    onChange?.call(value ?? '');
+    valueNotifier.value = inputTransform(value);
   }
 
   @override
   bool validate(String? value) {
-    return ((value?.length ?? 0) >= (minValue?.toString().length ?? 0)) &&
-        (isValid == null || isValid!(value));
+    return !isRequired || (((value?.length ?? 0) >= (minValue?.toString().length ?? 0)) &&
+        (isValid == null || isValid!(value)));
   }
 
   @override
@@ -107,23 +120,35 @@ class TextForm<K> extends IForm<String, K> {
     return Column(
       children: [
         labelWidget(),
-        input(context),
-        errorBuilder()
+        ValueListenableBuilder(
+            valueListenable: hideText,
+            builder: (context, obscureText, child) {
+              print("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ $obscureText $maxLines");
+              return input(context, obscureText);
+            }
+        ),
+        ValueListenableBuilder(
+            valueListenable: showErrorNotifier,
+            builder: (context, value, child) {
+              if (!value) return const SizedBox();
+              return errorBuilder();
+            }
+        )
       ],
     );
   }
 
   Widget labelWidget() => FormComponents.label(label, theme);
 
-  Widget input(BuildContext context) {
+  Widget input(BuildContext context, bool obscureText) {
     return Row(
       children: [
         Flexible(
           child: TextFormField(
             controller: _controller,
             focusNode: focusNode,
-            minLines: minLines,
-            maxLines: maxLines,
+            minLines: obscureText ? 1 : minLines,
+            maxLines: obscureText ? 1 : maxLines,
             onChanged: listener,
             readOnly: !editable,
             onTap: () => onTap(context, _controller),
@@ -132,9 +157,10 @@ class TextForm<K> extends IForm<String, K> {
             cursorColor: theme.cursorColor,
             style: theme.textStyle,
             showCursor: editable && type != FormsType.date,
+            obscureText: obscureText,
             decoration: FormComponents.inputDecoration(theme, hint, editable).copyWith(
-              suffix: suffix(changeValue),
-              prefix: prefix(changeValue),
+              suffixIcon: suffix(changeValue),
+              prefixIcon: prefix(changeValue),
             ),
           ),
         ),

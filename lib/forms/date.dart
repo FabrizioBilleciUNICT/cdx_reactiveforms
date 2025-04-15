@@ -15,10 +15,10 @@ class DateForm extends TextForm<DateTime> {
     required super.hint,
     required super.label,
     super.type = FormsType.date,
-    super.labelInfo = false,
-    super.required = false,
-    super.editable = true,
-    super.visible = true,
+    super.labelInfo,
+    super.isRequired,
+    super.editable,
+    super.visible,
     required super.initialValue,
     required this.outputFormat,
     this.readOnly = false,
@@ -72,9 +72,9 @@ class DateForm extends TextForm<DateTime> {
   bool validate(String? value) {
     print(value);
     DateTime? date = inputTransform(value);
-    return date != null
+    return !isRequired || (date != null
         && date.millisecondsSinceEpoch >= minValue!.millisecondsSinceEpoch
         && date.millisecondsSinceEpoch <= maxValue!.millisecondsSinceEpoch
-        && (isValid == null || isValid!(value));
+        && (isValid == null || isValid!(value)));
   }
 }

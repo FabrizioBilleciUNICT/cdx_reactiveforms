@@ -1,9 +1,7 @@
-
 import 'package:cdx_reactiveforms/models/types.dart';
 import 'package:flutter/material.dart';
 
 abstract class IForm<T, K> {
-
   /// Hint inside the input
   final String hint;
 
@@ -17,21 +15,27 @@ abstract class IForm<T, K> {
   final FormsType type;
 
   /// Field is required
-  final bool required;
+  final bool isRequired;
 
   /// Field is editable
   final bool editable;
 
   /// Field is visible
-  final bool visible; // must be dynamic
+  final bool visible;
 
   /// Show error on form send
   final ValueNotifier<String> errorNotifier;
 
-  String errorMessage(T? value);
+  final ValueNotifier<bool> showErrorNotifier;
+
+  void showError(bool show) {
+    showErrorNotifier.value = show;
+  }
+
+  /// Notify value changes
+  final ValueNotifier<K?> valueNotifier;
 
   final K? minValue;
-
   final K? maxValue;
 
   /// Custom validation
@@ -55,6 +59,9 @@ abstract class IForm<T, K> {
   /// Transform the output from 'K' to the right type, if not null
   T? outputTransform(K? output);
 
+  /// Error message
+  String errorMessage(T? value);
+
   /// The build method
   Widget build(BuildContext context, ValueListenableBuilder<String> Function() errorBuilder);
 
@@ -67,7 +74,7 @@ abstract class IForm<T, K> {
   /// Clear input
   void clear();
 
-  ///
+  /// Optional extra widget
   Widget actionWidget() => const SizedBox();
 
   IForm({
@@ -75,12 +82,14 @@ abstract class IForm<T, K> {
     required this.label,
     required this.type,
     required this.labelInfo,
-    required this.required,
+    required this.isRequired,
     required this.editable,
     required this.errorNotifier,
+    required this.showErrorNotifier,
     required this.visible,
     required this.minValue,
     required this.maxValue,
-    this.isValid
+    required this.valueNotifier,
+    this.isValid,
   });
 }

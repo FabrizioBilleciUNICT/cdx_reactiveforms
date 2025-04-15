@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-
 import '../models/iform.dart';
 
 /// Controller reattivo dei form, che gestisce una mappa di IForm.
@@ -23,7 +22,7 @@ class FormController<T> {
   /// Inizializza i listener per ciascun form per tenere traccia dei cambiamenti.
   void _initListeners() {
     for (var form in _formMap.values) {
-      form.errorNotifier.addListener(_updateValidStatus);
+      form.valueNotifier.addListener(_updateValidStatus);
     }
   }
 
@@ -31,7 +30,7 @@ class FormController<T> {
   void _updateValidStatus() {
     bool overallValid = true;
     for (var form in _formMap.values) {
-      print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ${_formMap.keys}");
+      print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ${form.label} ${_isValid(form)} ${form.valueNotifier.value}");
       // Utilizza currentValue() per recuperare il valore corrente del campo
       // e validate() per controllare la validità.
       if (!_isValid(form)) {
@@ -40,6 +39,12 @@ class FormController<T> {
       }
     }
     isValid.value = overallValid;
+  }
+
+  void showErrors() {
+    _formMap.forEach((key, form) {
+      form.showError(true);
+    });
   }
 
   /// Valida tutti i form.
@@ -90,7 +95,7 @@ class FormController<T> {
   /// Permette di aggiungere un nuovo form alla mappa.
   void addForm(String key, IForm form) {
     _formMap[key] = form;
-    form.errorNotifier.addListener(_updateValidStatus);
+    form.valueNotifier.addListener(_updateValidStatus);
     _updateValidStatus();
   }
 
@@ -98,7 +103,7 @@ class FormController<T> {
     resetAll();
     values.forEach((key, form) {
       _formMap[key] = form;
-      form.errorNotifier.addListener(_updateValidStatus);
+      form.valueNotifier.addListener(_updateValidStatus);
     });
     _updateValidStatus();
   }
@@ -107,7 +112,7 @@ class FormController<T> {
   void removeForm(String key) {
     final IForm? form = _formMap.remove(key);
     if (form != null) {
-      form.errorNotifier.removeListener(_updateValidStatus);
+      form.valueNotifier.removeListener(_updateValidStatus);
       _updateValidStatus();
     }
   }
@@ -115,7 +120,7 @@ class FormController<T> {
   /// Libera le risorse (es. listener) utilizzate dal controller.
   void dispose() {
     for (var form in _formMap.values) {
-      form.errorNotifier.removeListener(_updateValidStatus);
+      form.valueNotifier.removeListener(_updateValidStatus);
     }
     isValid.dispose();
   }

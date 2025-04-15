@@ -21,7 +21,7 @@ class DropdownForm<K> extends IForm<K, K> {
     required super.label,
     super.type = FormsType.text,
     super.labelInfo = false,
-    super.required = true,
+    super.isRequired = true,
     super.editable = true,
     super.visible = true,
     super.minValue,
@@ -31,8 +31,13 @@ class DropdownForm<K> extends IForm<K, K> {
     required this.optionsStream,
     this.focusNode,
     ValueNotifier<String>? errorNotifier,
+    ValueNotifier<bool>? showErrorNotifier,
     CdxInputThemeData? themeData,
-  }) : super(errorNotifier: errorNotifier ?? ValueNotifier('')) {
+  }) : super(
+    errorNotifier: errorNotifier ?? ValueNotifier(''),
+    showErrorNotifier: showErrorNotifier ?? ValueNotifier(false),
+    valueNotifier: ValueNotifier(initialValue),
+  ) {
     _initialValue = initialValue as K;
     _currentValue = initialValue;
     theme = themeData ?? DI.theme().inputTheme;
@@ -47,14 +52,16 @@ class DropdownForm<K> extends IForm<K, K> {
 
   @override
   bool validate(K? value) {
-    final isValidResult = value != null && (isValid == null || isValid!(value));
+    final isValidResult = !isRequired || (value != null && (isValid == null || isValid!(value)));
     errorNotifier.value = isValidResult ? '' : errorMessage(value);
     return isValidResult;
   }
 
   @override
   void listener(K? value) {
+    showError(false);
     validate(value);
+    valueNotifier.value = value;
   }
 
   @override
@@ -102,7 +109,13 @@ class DropdownForm<K> extends IForm<K, K> {
           children: [
             labelWidget(),
             input(items),
-            errorBuilder()
+            ValueListenableBuilder(
+              valueListenable: showErrorNotifier,
+              builder: (context, value, child) {
+                if (!value) return const SizedBox();
+                return errorBuilder();
+              }
+            )
           ],
         );
       },

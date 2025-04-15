@@ -13,10 +13,10 @@ class IntNumberForm extends TextForm<int> {
     required super.hint,
     required super.label,
     super.type = FormsType.intNumber,
-    super.labelInfo = false,
-    super.required = false,
-    super.editable = true,
-    super.visible = true,
+    super.labelInfo,
+    super.isRequired,
+    super.editable,
+    super.visible,
     super.errorNotifier,
     required super.initialValue,
     super.isValid,
@@ -39,6 +39,11 @@ class IntNumberForm extends TextForm<int> {
   @override
   int inputTransform(String? input) {
     return int.tryParse(input?.toString().trim() ?? '') ?? 0;
+  }
+
+  @override
+  bool validate(String? value) {
+    return !isRequired || super.validate(value);
   }
 
   @override
@@ -99,10 +104,10 @@ class DoubleNumberForm extends TextForm<double> {
     required super.hint,
     required super.label,
     super.type = FormsType.number,
-    super.labelInfo = false,
-    super.required = false,
-    super.editable = true,
-    super.visible = true,
+    super.labelInfo,
+    super.isRequired,
+    super.editable,
+    super.visible,
     super.errorNotifier,
     required super.initialValue,
     super.isValid,
@@ -125,5 +130,10 @@ class DoubleNumberForm extends TextForm<double> {
   @override
   double inputTransform(String? input) {
     return double.tryParse(input?.toString().trim() ?? '') ?? 0.0;
+  }
+
+  @override
+  bool validate(String? value) {
+    return !isRequired || super.validate(value);
   }
 }
