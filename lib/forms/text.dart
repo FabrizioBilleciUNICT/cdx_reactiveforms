@@ -123,7 +123,6 @@ class TextForm<K> extends IForm<String, K> {
         ValueListenableBuilder(
             valueListenable: hideText,
             builder: (context, obscureText, child) {
-              print("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ $obscureText $maxLines");
               return input(context, obscureText);
             }
         ),
