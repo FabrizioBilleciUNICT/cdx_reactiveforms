@@ -2,10 +2,11 @@ import 'package:cdx_reactiveforms/ui/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../models/disposable.dart';
 import '../models/types.dart';
 import 'base_form.dart';
 
-class MultilineForm<K> extends BaseForm<String, K> {
+class MultilineForm<K> extends BaseForm<String, K> with Disposable {
   late final TextEditingController _controller;
   late final String _initialValue;
   final List<TextInputFormatter> formatters;
@@ -63,8 +64,10 @@ class MultilineForm<K> extends BaseForm<String, K> {
   bool validate(String? value) {
     if (!isRequired) return true;
     if (value == null || value.isEmpty) return false;
-    return ((value.length >= (minValue?.toString().length ?? 0)) &&
-        (isValid == null || isValid!(value)));
+    if (isValid != null) {
+      return isValid!(value);
+    }
+    return true;
   }
 
   @override
@@ -110,6 +113,10 @@ class MultilineForm<K> extends BaseForm<String, K> {
       showCursor: editable,
       decoration: FormComponents.inputDecoration(theme, hint, editable),
     );
+  }
+
+  void dispose() {
+    _controller.dispose();
   }
 }
 

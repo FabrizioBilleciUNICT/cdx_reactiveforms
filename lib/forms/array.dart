@@ -3,12 +3,13 @@ import 'package:cdx_reactiveforms/controllers/form_controller.dart';
 import 'package:cdx_reactiveforms/forms/base_form.dart';
 import 'package:cdx_reactiveforms/models/iform.dart';
 import 'package:cdx_reactiveforms/models/disposable.dart';
+import 'package:cdx_reactiveforms/models/iarray_form.dart';
 import 'package:cdx_reactiveforms/models/types.dart';
 import 'package:cdx_reactiveforms/ui/delegate.dart';
 import 'package:cdx_reactiveforms/ui/layout_simple.dart';
 import 'package:flutter/material.dart';
 
-class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dynamic>>> with Disposable {
+class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dynamic>>> with Disposable implements IArrayForm {
   final List<FormController> _itemControllers = [];
   final FormBuilderDelegate? layoutDelegate;
   final FieldBuilder? fieldBuilder;
@@ -96,7 +97,38 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
   }
 
   List<Map<String, dynamic>> _getValues() {
-    return _itemControllers.map((controller) => controller.getValues()).toList();
+    return _itemControllers.map((controller) {
+      final values = controller.getValues();
+      // Deep copy and ensure all nested objects are converted to Map<String, dynamic>
+      // This handles cases where form values might contain custom objects
+      return Map<String, dynamic>.from(
+        values.map((key, value) {
+          // Recursively convert any nested objects to Map
+          final convertedValue = _convertToJsonCompatible(value);
+          return MapEntry(key, convertedValue);
+        })
+      );
+    }).toList();
+  }
+
+  dynamic _convertToJsonCompatible(dynamic value) {
+    if (value == null) return null;
+    if (value is Map) {
+      return Map<String, dynamic>.from(
+        value.map((k, v) => MapEntry(k.toString(), _convertToJsonCompatible(v)))
+      );
+    }
+    if (value is List) {
+      return value.map((e) => _convertToJsonCompatible(e)).toList();
+    }
+    // If value is a custom object with toJson, convert it
+    try {
+      final json = (value as dynamic).toJson();
+      return _convertToJsonCompatible(json);
+    } catch (e) {
+      // If toJson doesn't exist or fails, return as-is (primitive types)
+      return value;
+    }
   }
 
   List<FormController> get itemControllers => List.unmodifiable(_itemControllers);

@@ -5,10 +5,11 @@ import 'package:cdx_reactiveforms/ui/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../models/disposable.dart';
 import '../models/iform.dart';
 import '../models/types.dart';
 
-class TextForm<K> extends IForm<String, K> {
+class TextForm<K> extends IForm<String, K> with Disposable {
 
   late final TextEditingController _controller;
   late final String _initialValue;
@@ -84,8 +85,10 @@ class TextForm<K> extends IForm<String, K> {
   bool validate(String? value) {
     if (!isRequired) return true;
     if (value == null || value.isEmpty) return false;
-    return ((value.length >= (minValue?.toString().length ?? 0)) &&
-        (isValid == null || isValid!(value)));
+    if (isValid != null) {
+      return isValid!(value);
+    }
+    return true;
   }
 
   @override
@@ -116,6 +119,11 @@ class TextForm<K> extends IForm<String, K> {
   @override
   String errorMessage(String? value) {
     return 'This field is not valid';
+  }
+
+  void dispose() {
+    _controller.dispose();
+    hideText.dispose();
   }
 
   @override

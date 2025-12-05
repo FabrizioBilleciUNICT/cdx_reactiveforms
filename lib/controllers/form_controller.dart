@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/iform.dart';
 import '../models/disposable.dart';
 import '../models/inested_form.dart';
-import '../models/types.dart';
-import '../forms/array.dart';
+import '../models/iarray_form.dart';
 
 class FormController<T> {
   final Map<String, IForm> _formMap;
@@ -54,9 +53,8 @@ class FormController<T> {
       // Explicitly validate nested and array forms to update their internal isValid status
       if (form is INestedForm) {
         form.innerController.validateAll(showErrors: showErrors);
-      } else if (form.type == FormsType.customArray) {
-        final arrayForm = form as ArrayForm;
-        for (var controller in arrayForm.itemControllers) {
+      } else if (form is IArrayForm) {
+        for (var controller in form.itemControllers) {
           controller.validateAll(showErrors: showErrors);
         }
       }
