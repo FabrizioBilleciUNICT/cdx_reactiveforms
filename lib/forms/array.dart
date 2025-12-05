@@ -69,12 +69,16 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
     }
 
     controller.isValid.addListener(_onItemChange);
+    _syncItemControllerListeners(controller);
+    _itemControllers.add(controller);
+    _onItemChange();
+  }
+
+  void _syncItemControllerListeners(FormController controller) {
+    // Ensure all forms in the controller have listeners registered
     for (var form in controller.forms.values) {
       form.valueNotifier.addListener(_onItemChange);
     }
-
-    _itemControllers.add(controller);
-    _onItemChange();
   }
 
   void removeItem(int index) {
@@ -91,6 +95,10 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
   }
 
   void _onItemChange() {
+    // Sync listeners for all item controllers in case forms were added dynamically
+    for (var controller in _itemControllers) {
+      _syncItemControllerListeners(controller);
+    }
     final values = _getValues();
     valueNotifier.value = values;
     listener(values);
@@ -191,10 +199,15 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
       return;
     }
 
-    // Clear existing items
-    while (_itemControllers.isNotEmpty) {
-      removeItem(0);
+    // Optimize: clear existing items at once instead of one by one (O(n) instead of O(n²))
+    for (var controller in _itemControllers) {
+      controller.isValid.removeListener(_onItemChange);
+      for (var form in controller.forms.values) {
+        form.valueNotifier.removeListener(_onItemChange);
+      }
+      controller.dispose();
     }
+    _itemControllers.clear();
 
     // Add new items
     for (var itemData in newValue) {
@@ -203,11 +216,24 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
     _onItemChange();
   }
 
+  void showErrors() {
+    showError(true);
+    for (var controller in _itemControllers) {
+      controller.showErrors();
+    }
+  }
+
   @override
   void clear() {
-    while (_itemControllers.isNotEmpty) {
-      removeItem(0);
+    // Optimize: remove all items at once instead of one by one (O(n) instead of O(n²))
+    for (var controller in _itemControllers) {
+      controller.isValid.removeListener(_onItemChange);
+      for (var form in controller.forms.values) {
+        form.valueNotifier.removeListener(_onItemChange);
+      }
+      controller.dispose();
     }
+    _itemControllers.clear();
     valueNotifier.value = [];
   }
 

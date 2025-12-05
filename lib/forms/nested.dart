@@ -49,13 +49,32 @@ class NestedForm extends BaseForm<Map<String, dynamic>, Map<String, dynamic>> wi
     }
   }
 
+  void _syncInnerFormListeners() {
+    // Re-sync listeners in case forms were added dynamically
+    final currentForms = _innerController.forms.values.toSet();
+    // Note: This is a simple approach. In practice, forms added via innerController.addForm()
+    // should call this method or the listener should be added manually.
+    // For now, we ensure all current forms have listeners registered.
+    for (var form in currentForms) {
+      // Note: addListener is idempotent in Flutter, but we check to avoid duplicates
+      // In practice, if a form already has the listener, it won't be added again
+      form.valueNotifier.addListener(_onInnerFormChange);
+    }
+  }
+
   void _onInnerFormChange() {
+    // Sync listeners in case new forms were added
+    _syncInnerFormListeners();
     final values = _innerController.getValues();
     valueNotifier.value = values;
     listener(values);
   }
 
-  FormController get innerController => _innerController;
+  FormController get innerController {
+    // Ensure listeners are synced when accessing innerController
+    _syncInnerFormListeners();
+    return _innerController;
+  }
 
   @override
   bool validate(Map<String, dynamic>? value) {

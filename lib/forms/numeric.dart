@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import '../models/types.dart';
 
 class IntNumberForm extends TextForm<int> {
+  late final NumericIntRangeFormatter _rangeFormatter;
 
   IntNumberForm({
     required super.hint,
@@ -22,9 +23,10 @@ class IntNumberForm extends TextForm<int> {
     super.isValid,
     super.minValue = 0,
     super.maxValue = 1000000000000,
-  }) : super(
+  }) : _rangeFormatter = NumericIntRangeFormatter(min: minValue ?? 0, max: maxValue ?? 1000000000000),
+        super(
     formatters: [
-      NumericIntRangeFormatter(min: minValue!, max: maxValue!),
+      NumericIntRangeFormatter(min: minValue ?? 0, max: maxValue ?? 1000000000000),
       FilteringTextInputFormatter.allow(RegExp(r"\d")),
       TextInputFormatter.withFunction((oldValue, newValue) {
         final text = newValue.text;
@@ -70,7 +72,7 @@ class IntNumberForm extends TextForm<int> {
                   ),
                   onTap: () {
                     int value = inputTransform(currentValue());
-                    if (value < (formatters[0] as NumericIntRangeFormatter).max) {
+                    if (value < _rangeFormatter.max) {
                       setState(() => value++);
                       changeValue(value.toString());
                     }
@@ -85,7 +87,7 @@ class IntNumberForm extends TextForm<int> {
                 ),
                 onTap: () {
                   int value = inputTransform(currentValue());
-                  if (value > (formatters[0] as NumericIntRangeFormatter).min) {
+                  if (value > _rangeFormatter.min) {
                     setState(() => value--);
                     changeValue(value.toString());
                   }

@@ -43,6 +43,10 @@ class FormController<T> {
   void _showErrorsRecursive(IForm form) {
     if (form is INestedForm) {
       form.innerController.showErrors();
+    } else if (form is IArrayForm) {
+      for (var controller in form.itemControllers) {
+        controller.showErrors();
+      }
     }
   }
 
@@ -94,6 +98,16 @@ class FormController<T> {
   }
 
   void addForm(String key, IForm form) {
+    // Remove old form if exists
+    final oldForm = _formMap[key];
+    if (oldForm != null) {
+      oldForm.valueNotifier.removeListener(_updateValidStatus);
+      // Dispose old form if it has resources
+      if (oldForm is Disposable) {
+        (oldForm as Disposable).dispose();
+      }
+    }
+    
     _formMap[key] = form;
     form.valueNotifier.addListener(_updateValidStatus);
     _updateValidStatus();
@@ -102,6 +116,10 @@ class FormController<T> {
   void replaceForms(Map<String, IForm> newForms) {
     for (var form in _formMap.values) {
       form.valueNotifier.removeListener(_updateValidStatus);
+      // Dispose old forms that have resources
+      if (form is Disposable) {
+        (form as Disposable).dispose();
+      }
     }
     _formMap.clear();
     _formMap.addAll(newForms);

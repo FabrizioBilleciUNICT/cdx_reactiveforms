@@ -46,6 +46,9 @@ class MultilineForm<K> extends BaseForm<String, K> with Disposable {
 
   @override
   K? inputTransform(String? input) {
+    // For MultilineForm, K should be String. This cast is safe when K is String.
+    if (input == null) return null;
+    // Type-safe conversion: if K is String, this works
     return input as K?;
   }
 

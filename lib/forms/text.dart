@@ -1,5 +1,4 @@
 
-import 'package:cdx_core/core/models/input_theme_data.dart';
 import 'package:cdx_reactiveforms/ui/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -37,17 +36,13 @@ class TextForm<K> extends BaseForm<String, K> with Disposable {
     this.focusNode,
     this.minLines,
     this.maxLines,
-    ValueNotifier<String>? errorNotifier,
-    ValueNotifier<bool>? showErrorNotifier,
-    CdxInputThemeData? themeData,
+    super.errorNotifier,
+    super.showErrorNotifier,
+    super.themeData,
     bool initialHideText = false,
     this.onChange,
     super.errorMessageText,
-  }) : super(
-    errorNotifier: errorNotifier,
-    showErrorNotifier: showErrorNotifier,
-    themeData: themeData,
-  ) {
+  }) : super() {
     _controller = TextEditingController(text: outputTransform(initialValue));
     _initialValue = outputTransform(initialValue) ?? '';
     hideText = ValueNotifier(initialHideText);
@@ -60,6 +55,10 @@ class TextForm<K> extends BaseForm<String, K> with Disposable {
 
   @override
   K? inputTransform(String? input) {
+    // For TextForm, K should be String. This cast is safe when K is String.
+    // Subclasses like IntNumberForm and DoubleNumberForm override this method.
+    if (input == null) return null;
+    // Type-safe conversion: if K is String, this works; otherwise subclasses must override
     return input as K?;
   }
 
