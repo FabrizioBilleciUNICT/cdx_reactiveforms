@@ -71,20 +71,22 @@ class BooleanForm extends BaseForm<bool, bool> {
 
   @override
   Widget buildInput(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(hint, style: theme.textStyle),
-        ValueListenableBuilder(
-          valueListenable: valueNotifier,
-          builder: (context, value, _) {
-            return Switch(
+    final hintText = Text(hint, style: theme.textStyle);
+    return ValueListenableBuilder(
+      valueListenable: valueNotifier,
+      child: hintText,
+      builder: (context, value, child) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            child!,
+            Switch(
               value: value ?? false,
               onChanged: editable ? (val) => changeValue(val) : null,
-            );
-          }
-        ),
-      ],
+            ),
+          ],
+        );
+      }
     );
   }
 }

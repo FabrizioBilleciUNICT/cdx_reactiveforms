@@ -71,30 +71,32 @@ class CheckboxForm extends BaseForm<bool, bool> {
 
   @override
   Widget buildInput(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ValueListenableBuilder(
-          valueListenable: valueNotifier,
-          builder: (context, value, _) {
-            return Checkbox(
+    final hintWidget = Expanded(
+      child: GestureDetector(
+        onTap: editable ? () => changeValue(!_currentValue) : null,
+        child: Text(
+          hint,
+          style: theme.textStyle,
+        ),
+      ),
+    );
+    return ValueListenableBuilder(
+      valueListenable: valueNotifier,
+      child: hintWidget,
+      builder: (context, value, child) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Checkbox(
               value: value ?? false,
               onChanged: editable ? (val) => changeValue(val) : null,
-            );
-          }
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: GestureDetector(
-            onTap: editable ? () => changeValue(!_currentValue) : null,
-            child: Text(
-              hint,
-              style: theme.textStyle,
             ),
-          ),
-        ),
-      ],
+            const SizedBox(width: 8),
+            child!,
+          ],
+        );
+      }
     );
   }
 }
