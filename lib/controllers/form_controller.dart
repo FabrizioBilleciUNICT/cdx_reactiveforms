@@ -30,7 +30,6 @@ class FormController<T> {
   void _updateValidStatus() {
     bool overallValid = true;
     for (var form in _formMap.values) {
-      print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ${form.label} ${_isValid(form)} ${form.valueNotifier.value}");
       // Utilizza currentValue() per recuperare il valore corrente del campo
       // e validate() per controllare la validità.
       if (!_isValid(form)) {
