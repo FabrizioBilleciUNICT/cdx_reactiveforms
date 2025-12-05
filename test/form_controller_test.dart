@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cdx_reactiveforms/controllers/form_controller.dart';
+import 'package:cdx_reactiveforms/forms/array.dart';
 import 'package:cdx_reactiveforms/forms/boolean.dart';
 import 'package:cdx_reactiveforms/forms/checkbox.dart';
 import 'package:cdx_reactiveforms/forms/date.dart';
@@ -171,6 +172,28 @@ void main() {
           maxSize: 5,
         ),
         'address': addressForm,
+        'phoneNumbers': ArrayForm(
+          hint: 'Phone Numbers',
+          label: 'Phone Numbers',
+          itemFormFactory: () => {
+            'type': TextForm<String>(
+              hint: 'Type (e.g., Mobile, Home)',
+              label: 'Type',
+              initialValue: null,
+              isRequired: true,
+            ),
+            'number': TextForm<String>(
+              hint: 'Phone Number',
+              label: 'Number',
+              initialValue: null,
+              isRequired: true,
+            ),
+          },
+          isRequired: false,
+          minItems: 0,
+          maxItems: 5,
+          initialValue: null,
+        ),
       });
     });
 
@@ -246,7 +269,8 @@ void main() {
       expect(values['passwordField'], 'Password123!');
       expect(values['intNumberField'], 30);
       expect(values['doubleNumberField'], 75.5);
-      expect(values['dateField'], isA<DateTime>());
+            expect(values['dateField'], isA<String>());
+            expect(values['dateField'], '15/05/1994');
       expect(values['booleanField'], true);
       expect(values['checkboxField'], true);
       expect(values['radioField'], 'male');

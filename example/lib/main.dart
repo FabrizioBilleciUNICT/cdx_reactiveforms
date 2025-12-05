@@ -6,6 +6,7 @@ import 'package:cdx_core/core/services/app/imedia_service.dart';
 import 'package:cdx_core/core/services/app/itheme_service.dart';
 import 'package:get_it/get_it.dart';
 import 'package:cdx_reactiveforms/controllers/form_controller.dart';
+import 'package:cdx_reactiveforms/forms/array.dart';
 import 'package:cdx_reactiveforms/forms/boolean.dart';
 import 'package:cdx_reactiveforms/forms/checkbox.dart';
 import 'package:cdx_reactiveforms/forms/date.dart';
@@ -20,6 +21,7 @@ import 'package:cdx_reactiveforms/forms/radio.dart';
 import 'package:cdx_reactiveforms/forms/text.dart';
 import 'package:cdx_reactiveforms/models/dropdown_item.dart';
 import 'package:cdx_reactiveforms/ui/layout_simple.dart';
+import 'package:cdx_core/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'models/user_model.dart';
 import 'services/app_services.dart';
@@ -101,6 +103,13 @@ class _FormsExamplePageState extends State<FormsExamplePage> {
       DropdownItem(title: 'Travel', value: 'travel'),
       DropdownItem(title: 'Cooking', value: 'cooking'),
       DropdownItem(title: 'Photography', value: 'photography'),
+    ]);
+
+    _genderStreamController.add([
+      DropdownItem(title: 'Male', value: 'male'),
+      DropdownItem(title: 'Female', value: 'female'),
+      DropdownItem(title: 'Other', value: 'other'),
+      DropdownItem(title: 'Prefer not to say', value: 'prefer_not_to_say'),
     ]);
   }
 
@@ -220,6 +229,28 @@ class _FormsExamplePageState extends State<FormsExamplePage> {
         maxSize: 5,
       ),
       'address': addressForm,
+      'phoneNumbers': ArrayForm(
+        hint: 'Phone Numbers',
+        label: 'Phone Numbers',
+        itemFormFactory: () => {
+          'type': TextForm<String>(
+            hint: 'Type (e.g., Mobile, Home)',
+            label: 'Type',
+            initialValue: null,
+            isRequired: true,
+          ),
+          'number': TextForm<String>(
+            hint: 'Phone Number',
+            label: 'Number',
+            initialValue: null,
+            isRequired: true,
+          ),
+        },
+        isRequired: false,
+        minItems: 0,
+        maxItems: 5,
+        initialValue: null,
+      ),
     });
   }
 
@@ -228,6 +259,7 @@ class _FormsExamplePageState extends State<FormsExamplePage> {
     _formController.dispose();
     _countryStreamController.close();
     _hobbyStreamController.close();
+    _genderStreamController.close();
     super.dispose();
   }
 
@@ -325,20 +357,7 @@ class _FormsExamplePageState extends State<FormsExamplePage> {
 
   UserModel _createModelFromForm() {
     final values = _formController.getValues();
-    
-    // Convert DateTime to String format for JSON serialization
-    final dateValue = values['dateField'];
-    if (dateValue is DateTime) {
-      final dateForm = _formController.forms['dateField'] as DateForm?;
-      values['dateField'] = dateForm?.outputTransform(dateValue) ?? dateValue.toIso8601String();
-    }
-    
-    // Convert List<dynamic> to List<String> for hobbies
-    final hobbiesValue = values['multiselectField'];
-    if (hobbiesValue is List) {
-      values['multiselectField'] = hobbiesValue.map((e) => e.toString()).toList();
-    }
-    
+    // getValues() should return JSON-ready values directly, no transformations needed
     return UserModel.fromJson(values);
   }
 
@@ -355,8 +374,8 @@ class _FormsExamplePageState extends State<FormsExamplePage> {
     if (model.birthDate != null) {
       final dateForm = forms['dateField'] as DateForm?;
       if (dateForm != null) {
-        final dateString = dateForm.outputTransform(model.birthDate);
-        dateForm.changeValue(dateString ?? '');
+        final dateString = model.birthDate!.format(dateForm.outputFormat);
+        dateForm.changeValue(dateString);
       }
     }
     
@@ -373,6 +392,16 @@ class _FormsExamplePageState extends State<FormsExamplePage> {
         (addressForms['street'] as TextForm<String>?)?.changeValue(model.address!.street ?? '');
         (addressForms['city'] as TextForm<String>?)?.changeValue(model.address!.city ?? '');
         (addressForms['zipCode'] as TextForm<String>?)?.changeValue(model.address!.zipCode ?? '');
+      }
+    }
+
+    if (model.phoneNumbers.isNotEmpty) {
+      final phoneNumbersForm = forms['phoneNumbers'] as ArrayForm?;
+      if (phoneNumbersForm != null) {
+        final phoneNumbersData = model.phoneNumbers
+            .map((phone) => phone.toJson())
+            .toList();
+        phoneNumbersForm.changeValue(phoneNumbersData);
       }
     }
   }
@@ -488,9 +517,11 @@ class _FormsExamplePageState extends State<FormsExamplePage> {
           children: [
             Icon(Icons.info_outline, color: Colors.grey),
             SizedBox(width: 8),
-            Text(
-              'No saved model. Click "Save Form" to create a model from form values.',
-              style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+            Expanded(
+              child: Text(
+                'No saved model. Click "Save Form" to create a model from form values.',
+                style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+              ),
             ),
           ],
         ),

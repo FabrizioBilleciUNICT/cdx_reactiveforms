@@ -38,6 +38,40 @@ class AddressModel {
 }
 
 @JsonSerializable()
+class PhoneNumberModel {
+  @JsonKey(name: 'type')
+  final String? type;
+
+  @JsonKey(name: 'number')
+  final String? number;
+
+  PhoneNumberModel({
+    this.type,
+    this.number,
+  });
+
+  factory PhoneNumberModel.fromJson(Map<String, dynamic> json) =>
+      _$PhoneNumberModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$PhoneNumberModelToJson(this);
+
+  PhoneNumberModel copyWith({
+    String? type,
+    String? number,
+  }) {
+    return PhoneNumberModel(
+      type: type ?? this.type,
+      number: number ?? this.number,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'PhoneNumberModel(type: $type, number: $number)';
+  }
+}
+
+@JsonSerializable()
 class UserModel {
   @JsonKey(name: 'textField')
   final String? fullName;
@@ -78,6 +112,9 @@ class UserModel {
   @JsonKey(name: 'address')
   final AddressModel? address;
 
+  @JsonKey(name: 'phoneNumbers')
+  final List<PhoneNumberModel> phoneNumbers;
+
   UserModel({
     this.fullName,
     this.bio,
@@ -92,6 +129,7 @@ class UserModel {
     this.country,
     this.hobbies = const [],
     this.address,
+    this.phoneNumbers = const [],
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
@@ -168,11 +206,15 @@ class UserModel {
         city: 'Milano',
         zipCode: '20100',
       ),
+      phoneNumbers: [
+        PhoneNumberModel(type: 'Mobile', number: '+39 123 456 7890'),
+        PhoneNumberModel(type: 'Home', number: '+39 02 1234 5678'),
+      ],
     );
   }
 
   @override
   String toString() {
-    return 'UserModel(fullName: $fullName, bio: $bio, email: $email, age: $age, weight: $weight, birthDate: $birthDate, termsAccepted: $termsAccepted, newsletter: $newsletter, gender: $gender, country: $country, hobbies: $hobbies, address: $address)';
+    return 'UserModel(fullName: $fullName, bio: $bio, email: $email, age: $age, weight: $weight, birthDate: $birthDate, termsAccepted: $termsAccepted, newsletter: $newsletter, gender: $gender, country: $country, hobbies: $hobbies, address: $address, phoneNumbers: $phoneNumbers)';
   }
 }

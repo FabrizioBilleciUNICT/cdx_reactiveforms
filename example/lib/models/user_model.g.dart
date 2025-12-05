@@ -19,6 +19,15 @@ Map<String, dynamic> _$AddressModelToJson(AddressModel instance) =>
       'zipCode': instance.zipCode,
     };
 
+PhoneNumberModel _$PhoneNumberModelFromJson(Map<String, dynamic> json) =>
+    PhoneNumberModel(
+      type: json['type'] as String?,
+      number: json['number'] as String?,
+    );
+
+Map<String, dynamic> _$PhoneNumberModelToJson(PhoneNumberModel instance) =>
+    <String, dynamic>{'type': instance.type, 'number': instance.number};
+
 UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   fullName: json['textField'] as String?,
   bio: json['multilineField'] as String?,
@@ -39,6 +48,11 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   address: json['address'] == null
       ? null
       : AddressModel.fromJson(json['address'] as Map<String, dynamic>),
+  phoneNumbers:
+      (json['phoneNumbers'] as List<dynamic>?)
+          ?.map((e) => PhoneNumberModel.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
@@ -55,4 +69,5 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'dropdownField': instance.country,
   'multiselectField': instance.hobbies,
   'address': instance.address,
+  'phoneNumbers': instance.phoneNumbers,
 };

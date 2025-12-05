@@ -57,10 +57,6 @@ class RadioForm<K> extends BaseForm<K, K> {
     return !isRequired || (value != null && (isValid == null || isValid!(value)));
   }
 
-  @override
-  void listener(K? value) {
-    super.listener(value);
-  }
 
   @override
   void changeValue(K? newValue) {
@@ -109,18 +105,23 @@ class RadioForm<K> extends BaseForm<K, K> {
           );
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: items.map((item) {
-            final isSelected = _currentValue == item.value;
-            return RadioListTile<K>(
-              title: Text(item.title, style: theme.textStyle),
-              value: item.value,
-              groupValue: _currentValue,
-              onChanged: editable ? (K? value) => changeValue(value) : null,
-              selected: isSelected,
+        return ValueListenableBuilder<K?>(
+          valueListenable: valueNotifier,
+          builder: (context, currentValue, child) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: items.map((item) {
+                final isSelected = currentValue == item.value;
+                return RadioListTile<K>(
+                  title: Text(item.title, style: theme.textStyle),
+                  value: item.value,
+                  groupValue: currentValue,
+                  onChanged: editable ? (K? value) => changeValue(value) : null,
+                  selected: isSelected,
+                );
+              }).toList(),
             );
-          }).toList(),
+          },
         );
       },
     );

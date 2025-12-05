@@ -3,7 +3,6 @@ import 'package:cdx_core/core/models/color_set.dart';
 import 'package:cdx_core/core/models/button_theme_data.dart';
 import 'package:cdx_core/core/services/app/itheme_service.dart';
 import 'package:cdx_core/app/theme.dart';
-import 'package:cdx_core/injector.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter/material.dart';
 

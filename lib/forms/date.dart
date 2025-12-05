@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../models/types.dart';
 
 
-class DateForm extends TextForm<DateTime> {
+class DateForm extends TextForm<String> {
 
   final bool readOnly;
   final String outputFormat;
@@ -28,18 +28,24 @@ class DateForm extends TextForm<DateTime> {
     errorNotifier: ValueNotifier(''),
     formatters: [],
     inputType: TextInputType.datetime,
-    minValue: minDate ?? DateTime(1900),
-    maxValue: maxDate ?? DateTime(2100),
-  );
+    minValue: (minDate ?? DateTime(1900)).format(outputFormat),
+    maxValue: (maxDate ?? DateTime(2100)).format(outputFormat),
+  ) {
+    _minDate = minDate ?? DateTime(1900);
+    _maxDate = maxDate ?? DateTime(2100);
+  }
+  
+  late final DateTime _minDate;
+  late final DateTime _maxDate;
 
   @override
   void onTap(BuildContext context, TextEditingController controller) async {
     if (readOnly) return;
     DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: inputTransform(controller.text),
-      firstDate: minValue!,
-      lastDate: maxValue!,
+      initialDate: _parseDate(controller.text) ?? _minDate,
+      firstDate: _minDate,
+      lastDate: _maxDate,
       builder: (context, child) {
         return Theme(
           data: ThemeData.light().copyWith(
@@ -54,26 +60,33 @@ class DateForm extends TextForm<DateTime> {
       },
     );
     if (pickedDate != null) {
-      changeValue(outputTransform(pickedDate));
+      changeValue(pickedDate.format(outputFormat));
     }
   }
 
   @override
-  DateTime? inputTransform(String? input) {
+  String? inputTransform(String? input) {
+    // For JSON serialization, return the string directly
+    // DateTime parsing is handled internally for validation
+    return input;
+  }
+  
+  DateTime? _parseDate(String? input) {
     return DatesUtils.parse(input, outputFormat);
   }
 
   @override
-  String? outputTransform(DateTime? output) {
-    return output?.format(outputFormat);
+  String? outputTransform(String? output) {
+    // For TextForm<String>, outputTransform is identity
+    return output;
   }
 
   @override
   bool validate(String? value) {
-    DateTime? date = inputTransform(value);
+    DateTime? date = _parseDate(value);
     return !isRequired || (date != null
-        && date.millisecondsSinceEpoch >= minValue!.millisecondsSinceEpoch
-        && date.millisecondsSinceEpoch <= maxValue!.millisecondsSinceEpoch
+        && date.millisecondsSinceEpoch >= _minDate.millisecondsSinceEpoch
+        && date.millisecondsSinceEpoch <= _maxDate.millisecondsSinceEpoch
         && (isValid == null || isValid!(value)));
   }
 }

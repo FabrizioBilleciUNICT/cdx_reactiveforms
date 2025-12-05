@@ -63,6 +63,8 @@ class NestedForm extends BaseForm<Map<String, dynamic>, Map<String, dynamic>> {
     if (value == null || value.isEmpty) {
       return false;
     }
+    // Validate inner forms first to ensure isValid.value is up to date
+    _innerController.validateAll();
     final innerValid = _innerController.isValid.value;
     if (isValid != null) {
       return innerValid && isValid!(value);
