@@ -70,7 +70,6 @@ class DateForm extends TextForm<DateTime> {
 
   @override
   bool validate(String? value) {
-    print(value);
     DateTime? date = inputTransform(value);
     return !isRequired || (date != null
         && date.millisecondsSinceEpoch >= minValue!.millisecondsSinceEpoch

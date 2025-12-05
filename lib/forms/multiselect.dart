@@ -1,24 +1,21 @@
-
-import 'package:cdx_core/core/models/input_theme_data.dart';
+import 'dart:async';
 import 'package:cdx_core/injector.dart';
 import 'package:flutter/material.dart';
-
+import '../forms/base_form.dart';
 import '../models/dropdown_item.dart';
-import '../models/iform.dart';
 import '../models/types.dart';
-import '../ui/components.dart';
 
-class SelectableForm<K> extends IForm<List<K>, List<K>> {
+class SelectableForm<K> extends BaseForm<List<K>, List<K>> {
   final Stream<List<DropdownItem<K>>> optionsStream;
   final FocusNode? focusNode;
   final int? minSize;
   final int? maxSize;
   final Widget Function(BuildContext, DropdownItem<K>, bool isSelected)? itemBuilder;
-  late final CdxInputThemeData theme;
 
-  late final List<K> _initialValue;
+  final List<K> _initialValue;
   List<K> _selectedValues = [];
   List<DropdownItem<K>> _options = [];
+  StreamSubscription<List<DropdownItem<K>>>? _subscription;
 
   SelectableForm({
     required super.hint,
@@ -34,39 +31,35 @@ class SelectableForm<K> extends IForm<List<K>, List<K>> {
     super.minValue,
     super.maxValue,
     super.isValid,
-    ValueNotifier<String>? errorNotifier,
-    ValueNotifier<bool>? showErrorNotifier,
-    CdxInputThemeData? themeData,
+    super.errorNotifier,
+    super.showErrorNotifier,
+    super.themeData,
+    super.errorMessageText = 'Please select at least one value',
     this.minSize = 1,
-    this.maxSize = 1
-  }) : super(
-    type: FormsType.multiselect,
-    errorNotifier: errorNotifier ?? ValueNotifier(''),
-    showErrorNotifier: showErrorNotifier ?? ValueNotifier(false),
-    valueNotifier: ValueNotifier(initialValue),
-  ) {
-    _initialValue = initialValue;
-    _selectedValues = List.from(initialValue);
-    theme = themeData ?? DI.theme().inputTheme;
-
-    optionsStream.listen((list) {
+    this.maxSize = 1,
+  }) : _initialValue = List.from(initialValue),
+        _selectedValues = List.from(initialValue),
+        super(type: FormsType.multiselect) {
+    valueNotifier.value = initialValue;
+    _subscription = optionsStream.listen((list) {
       _options = list;
       _selectedValues.removeWhere((sel) => !_options.any((opt) => opt.value == sel));
+      valueNotifier.value = List.from(_selectedValues);
     });
+  }
+
+  void dispose() {
+    _subscription?.cancel();
   }
 
   @override
   bool validate(List<K>? value) {
-    final isValidResult = !isRequired || (value != null && value.isNotEmpty && (isValid == null || isValid!(value)));
-    errorNotifier.value = isValidResult ? '' : errorMessage(value);
-    return isValidResult;
+    return !isRequired || (value != null && value.isNotEmpty && (isValid == null || isValid!(value)));
   }
 
   @override
   void listener(List<K>? value) {
-    showError(false);
-    validate(value);
-    valueNotifier.value = value ?? [];
+    super.listener(value ?? []);
   }
 
   @override
@@ -81,11 +74,13 @@ class SelectableForm<K> extends IForm<List<K>, List<K>> {
   @override
   void clear() {
     _selectedValues = [];
+    valueNotifier.value = [];
   }
 
   @override
   void reset() {
     _selectedValues = List.from(_initialValue);
+    valueNotifier.value = List.from(_initialValue);
   }
 
   @override
@@ -98,29 +93,23 @@ class SelectableForm<K> extends IForm<List<K>, List<K>> {
   List<K>? outputTransform(List<K>? output) => output;
 
   @override
-  String errorMessage(List<K>? value) => 'Seleziona almeno un valore';
-
-  @override
   Widget build(BuildContext context, ValueListenableBuilder<String> Function() errorBuilder) {
     return StreamBuilder<List<DropdownItem<K>>>(
       stream: optionsStream,
       builder: (context, snapshot) {
         final items = snapshot.data ?? [];
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             labelWidget(),
             ValueListenableBuilder(
               valueListenable: valueNotifier,
-              builder: (context, value, child) {
-                return _buildOptionsList(context, items);
-              }
+              builder: (context, value, child) => _buildOptionsList(context, items),
             ),
             ValueListenableBuilder(
               valueListenable: showErrorNotifier,
-              builder: (context, value, child) {
-                if (!value) return const SizedBox();
+              builder: (context, show, child) {
+                if (!show) return const SizedBox();
                 return errorBuilder();
               },
             ),
@@ -129,8 +118,6 @@ class SelectableForm<K> extends IForm<List<K>, List<K>> {
       },
     );
   }
-
-  Widget labelWidget() => FormComponents.label(label, theme);
 
   Widget _buildOptionsList(BuildContext context, List<DropdownItem<K>> items) {
     return SingleChildScrollView(
@@ -172,13 +159,13 @@ class SelectableForm<K> extends IForm<List<K>, List<K>> {
     return Padding(
       padding: const EdgeInsets.all(4),
       child: Container(
-        padding: DI.theme().inputTheme.contentPadding,
+        padding: theme.contentPadding,
         decoration: BoxDecoration(
           color: DI.colors().minorBackground,
           borderRadius: BorderRadius.circular(8),
           border: Border.fromBorderSide(isSelected
-              ? DI.theme().inputTheme.focusedBorder
-              : DI.theme().inputTheme.enabledBorder
+              ? theme.focusedBorder
+              : theme.enabledBorder
         )),
         child: Row(
           children: [
@@ -191,5 +178,10 @@ class SelectableForm<K> extends IForm<List<K>, List<K>> {
         ),
       ),
     );
+  }
+
+  @override
+  Widget buildInput(BuildContext context) {
+    return _buildOptionsList(context, _options);
   }
 }

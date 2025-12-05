@@ -1,14 +1,9 @@
-import 'package:cdx_core/core/models/input_theme_data.dart';
-import 'package:cdx_core/injector.dart';
 import 'package:flutter/material.dart';
-import '../models/iform.dart';
+import '../forms/base_form.dart';
 import '../models/types.dart';
-import '../ui/components.dart';
 
-class BooleanForm extends IForm<bool, bool> {
-  late final bool _initialValue;
-  late final CdxInputThemeData theme;
-
+class BooleanForm extends BaseForm<bool, bool> {
+  final bool _initialValue;
   bool _currentValue;
 
   BooleanForm({
@@ -21,33 +16,27 @@ class BooleanForm extends IForm<bool, bool> {
     super.visible = true,
     super.isValid,
     required bool initialValue,
-    ValueNotifier<String>? errorNotifier,
-    ValueNotifier<bool>? showErrorNotifier,
-    CdxInputThemeData? themeData,
+    super.errorNotifier,
+    super.showErrorNotifier,
+    super.themeData,
+    super.errorMessageText = 'This field is required',
   })  : _currentValue = initialValue,
+        _initialValue = initialValue,
         super(
         minValue: null,
         maxValue: null,
-        errorNotifier: errorNotifier ?? ValueNotifier(''),
-        showErrorNotifier: showErrorNotifier ?? ValueNotifier(false),
-        valueNotifier: ValueNotifier(initialValue),
       ) {
-    _initialValue = initialValue;
-    theme = themeData ?? DI.theme().inputTheme;
+    valueNotifier.value = initialValue;
   }
 
   @override
   bool validate(bool? value) {
-    final isValidResult = !isRequired || (value != null && (isValid == null || isValid!(value)));
-    errorNotifier.value = isValidResult ? '' : errorMessage(value);
-    return isValidResult;
+    return !isRequired || (value != null && (isValid == null || isValid!(value)));
   }
 
   @override
   void listener(bool? value) {
-    showError(false);
-    validate(value);
-    valueNotifier.value = value ?? false;
+    super.listener(value ?? false);
   }
 
   @override
@@ -62,6 +51,7 @@ class BooleanForm extends IForm<bool, bool> {
   @override
   void clear() {
     _currentValue = false;
+    valueNotifier.value = false;
   }
 
   @override
@@ -80,39 +70,21 @@ class BooleanForm extends IForm<bool, bool> {
   bool? outputTransform(bool? output) => output ?? false;
 
   @override
-  String errorMessage(bool? value) => 'Campo obbligatorio';
-
-  @override
-  Widget build(BuildContext context, ValueListenableBuilder<String> Function() errorBuilder) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget buildInput(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        labelWidget(),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(hint, style: DI.theme().inputTheme.textStyle),
-            ValueListenableBuilder(
-              valueListenable: valueNotifier,
-              builder: (context, value, _) {
-                return Switch(
-                  value: value ?? false,
-                  onChanged: editable ? (val) => changeValue(val) : null,
-                );
-              }
-            ),
-          ],
-        ),
+        Text(hint, style: theme.textStyle),
         ValueListenableBuilder(
-          valueListenable: showErrorNotifier,
-          builder: (context, show, child) {
-            if (!show) return const SizedBox();
-            return errorBuilder();
-          },
-        )
+          valueListenable: valueNotifier,
+          builder: (context, value, _) {
+            return Switch(
+              value: value ?? false,
+              onChanged: editable ? (val) => changeValue(val) : null,
+            );
+          }
+        ),
       ],
     );
   }
-
-  Widget labelWidget() => FormComponents.label(label, theme);
 }

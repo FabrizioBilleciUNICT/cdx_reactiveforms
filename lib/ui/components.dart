@@ -17,7 +17,6 @@ abstract class FormComponents {
                 style: theme.labelTextStyle
             ),
           ),
-          //labelInfo ?? const SizedBox(),
         ]
     );
   }

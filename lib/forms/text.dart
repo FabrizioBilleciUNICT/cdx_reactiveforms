@@ -73,8 +73,7 @@ class TextForm<K> extends IForm<String, K> {
     final bool valid = validate(value);
     if (!valid) {
       errorNotifier.value = errorMessage(value);
-    }
-    else {
+    } else {
       errorNotifier.value = '';
     }
     onChange?.call(value ?? '');
@@ -100,11 +99,13 @@ class TextForm<K> extends IForm<String, K> {
   @override
   void clear() {
     _controller.text = '';
+    valueNotifier.value = inputTransform('');
   }
 
   @override
   void reset() {
     _controller.text = _initialValue;
+    valueNotifier.value = inputTransform(_initialValue);
   }
 
   @override
@@ -112,9 +113,9 @@ class TextForm<K> extends IForm<String, K> {
 
   @override
   String errorMessage(String? value) {
-    return 'Field is not valid';
+    return 'This field is not valid';
   }
-  
+
   @override
   Widget build(BuildContext context, ValueListenableBuilder<String> Function()? errorBuilder) {
     return Column(
@@ -166,19 +167,6 @@ class TextForm<K> extends IForm<String, K> {
         ),
         actionWidget()
       ],
-    );
-  }
-
-  Widget errorBuilder() {
-    return ValueListenableBuilder(
-        valueListenable: errorNotifier,
-        builder: (context, value, child) {
-          if (value.isNotEmpty) {
-            return Text(value, style: TextStyle(fontSize: 12, color: DI.colors().error));
-          }
-
-          return const SizedBox();
-        }
     );
   }
 }

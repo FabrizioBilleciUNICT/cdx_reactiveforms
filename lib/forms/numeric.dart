@@ -87,7 +87,7 @@ class IntNumberForm extends TextForm<int> {
                   int value = inputTransform(currentValue());
                   if (value > (formatters[0] as NumericIntRangeFormatter).min) {
                     setState(() => value--);
-                    changeValue(currentValue.toString());
+                    changeValue(value.toString());
                   }
                 },
               ),
