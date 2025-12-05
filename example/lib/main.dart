@@ -15,6 +15,7 @@ import 'package:cdx_reactiveforms/forms/multiselect.dart';
 import 'package:cdx_reactiveforms/forms/nested.dart';
 import 'package:cdx_reactiveforms/forms/numeric.dart';
 import 'package:cdx_reactiveforms/forms/password.dart';
+import 'package:cdx_reactiveforms/forms/radio.dart';
 import 'package:cdx_reactiveforms/forms/text.dart';
 import 'package:cdx_reactiveforms/models/dropdown_item.dart';
 import 'package:cdx_reactiveforms/ui/layout_simple.dart';
@@ -68,6 +69,8 @@ class _FormsExamplePageState extends State<FormsExamplePage> {
   final StreamController<List<DropdownItem<String>>> _countryStreamController =
       StreamController<List<DropdownItem<String>>>.broadcast();
   final StreamController<List<DropdownItem<String>>> _hobbyStreamController =
+      StreamController<List<DropdownItem<String>>>.broadcast();
+  final StreamController<List<DropdownItem<String>>> _genderStreamController =
       StreamController<List<DropdownItem<String>>>.broadcast();
   UserModel? _savedUserModel;
 
@@ -183,6 +186,13 @@ class _FormsExamplePageState extends State<FormsExamplePage> {
         label: 'Newsletter',
         initialValue: false,
         isRequired: false,
+      ),
+      'radioField': RadioForm<String>(
+        hint: 'Select your gender',
+        label: 'Gender',
+        initialValue: null,
+        optionsStream: _genderStreamController.stream,
+        isRequired: true,
       ),
       'dropdownField': DropdownForm<String>(
         hint: 'Select your country',
@@ -342,6 +352,7 @@ class _FormsExamplePageState extends State<FormsExamplePage> {
     
     (forms['booleanField'] as BooleanForm?)?.changeValue(model.termsAccepted);
     (forms['checkboxField'] as CheckboxForm?)?.changeValue(model.newsletter);
+    (forms['radioField'] as RadioForm<String>?)?.changeValue(model.gender);
     (forms['dropdownField'] as DropdownForm<String>?)?.changeValue(model.country);
     (forms['multiselectField'] as SelectableForm<String>?)?.changeValue(model.hobbies);
 

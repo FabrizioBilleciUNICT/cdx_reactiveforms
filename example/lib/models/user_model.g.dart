@@ -28,6 +28,7 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   birthDate: UserModel._dateFromJson(json['dateField'] as String?),
   termsAccepted: json['booleanField'] as bool? ?? false,
   newsletter: json['checkboxField'] as bool? ?? false,
+  gender: json['radioField'] as String?,
   country: json['dropdownField'] as String?,
   hobbies:
       (json['multiselectField'] as List<dynamic>?)
@@ -48,6 +49,7 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'dateField': UserModel._dateToJson(instance.birthDate),
   'booleanField': instance.termsAccepted,
   'checkboxField': instance.newsletter,
+  'radioField': instance.gender,
   'dropdownField': instance.country,
   'multiselectField': instance.hobbies,
   'address': instance.address,

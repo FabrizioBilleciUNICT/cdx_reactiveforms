@@ -10,6 +10,7 @@ import 'package:cdx_reactiveforms/forms/multiselect.dart';
 import 'package:cdx_reactiveforms/forms/nested.dart';
 import 'package:cdx_reactiveforms/forms/numeric.dart';
 import 'package:cdx_reactiveforms/forms/password.dart';
+import 'package:cdx_reactiveforms/forms/radio.dart';
 import 'package:cdx_reactiveforms/forms/text.dart';
 import 'package:cdx_reactiveforms/models/dropdown_item.dart';
 import 'test_helpers.dart';
@@ -23,10 +24,12 @@ void main() {
     late FormController formController;
     late StreamController<List<DropdownItem<String>>> countryStreamController;
     late StreamController<List<DropdownItem<String>>> hobbyStreamController;
+    late StreamController<List<DropdownItem<String>>> genderStreamController;
 
     setUp(() {
       countryStreamController = StreamController<List<DropdownItem<String>>>.broadcast();
       hobbyStreamController = StreamController<List<DropdownItem<String>>>.broadcast();
+      genderStreamController = StreamController<List<DropdownItem<String>>>.broadcast();
 
       // Emit initial data
       countryStreamController.add([
@@ -43,6 +46,13 @@ void main() {
         DropdownItem(title: 'Music', value: 'music'),
         DropdownItem(title: 'Travel', value: 'travel'),
         DropdownItem(title: 'Cooking', value: 'cooking'),
+      ]);
+
+      genderStreamController.add([
+        DropdownItem(title: 'Male', value: 'male'),
+        DropdownItem(title: 'Female', value: 'female'),
+        DropdownItem(title: 'Other', value: 'other'),
+        DropdownItem(title: 'Prefer not to say', value: 'prefer_not_to_say'),
       ]);
 
       final addressForm = NestedForm(
@@ -128,6 +138,13 @@ void main() {
           initialValue: false,
           isRequired: false,
         ),
+        'radioField': RadioForm<String>(
+          hint: 'Select your gender',
+          label: 'Gender',
+          initialValue: null,
+          optionsStream: genderStreamController.stream,
+          isRequired: true,
+        ),
         'dropdownField': DropdownForm<String>(
           hint: 'Select your country',
           label: 'Country',
@@ -152,6 +169,7 @@ void main() {
       formController.dispose();
       countryStreamController.close();
       hobbyStreamController.close();
+      genderStreamController.close();
     });
 
     test('Form should be invalid initially', () {
@@ -166,6 +184,7 @@ void main() {
       formController.forms['intNumberField']?.changeValue('30');
       formController.forms['dateField']?.changeValue('15/05/1994');
       formController.forms['booleanField']?.changeValue(true);
+      formController.forms['radioField']?.changeValue('male');
       formController.forms['dropdownField']?.changeValue('IT');
       formController.forms['multiselectField']?.changeValue(['reading', 'sports']);
 
@@ -198,6 +217,7 @@ void main() {
       formController.forms['dateField']?.changeValue('15/05/1994');
       formController.forms['booleanField']?.changeValue(true);
       formController.forms['checkboxField']?.changeValue(true);
+      formController.forms['radioField']?.changeValue('male');
       formController.forms['dropdownField']?.changeValue('IT');
       formController.forms['multiselectField']?.changeValue(['reading', 'sports']);
 
@@ -219,6 +239,7 @@ void main() {
       expect(values['dateField'], isA<DateTime>());
       expect(values['booleanField'], true);
       expect(values['checkboxField'], true);
+      expect(values['radioField'], 'male');
       expect(values['dropdownField'], 'IT');
       expect(values['multiselectField'], ['reading', 'sports']);
 
@@ -373,6 +394,30 @@ void main() {
       dropdownForm.changeValue('IT');
       expect(dropdownForm.currentValue(), 'IT');
       expect(dropdownForm.validate(dropdownForm.currentValue()), true);
+    });
+
+    test('Form should handle radio selection', () async {
+      final radioForm = formController.forms['radioField'] as RadioForm<String>;
+      
+      // Initially invalid if required and no selection
+      expect(radioForm.validate(radioForm.currentValue()), false);
+
+      // Wait for stream to populate options
+      await Future.delayed(const Duration(milliseconds: 200));
+      radioForm.changeValue('male');
+      await Future.delayed(const Duration(milliseconds: 100));
+      expect(radioForm.currentValue(), 'male');
+      expect(radioForm.validate(radioForm.currentValue()), true);
+
+      radioForm.changeValue('female');
+      await Future.delayed(const Duration(milliseconds: 100));
+      expect(radioForm.currentValue(), 'female');
+      expect(radioForm.validate(radioForm.currentValue()), true);
+
+      radioForm.changeValue(null);
+      await Future.delayed(const Duration(milliseconds: 100));
+      expect(radioForm.currentValue(), null);
+      expect(radioForm.validate(radioForm.currentValue()), false);
     });
 
     test('Form should handle multiselect selection', () async {

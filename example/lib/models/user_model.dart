@@ -63,6 +63,9 @@ class UserModel {
   @JsonKey(name: 'checkboxField')
   final bool newsletter;
 
+  @JsonKey(name: 'radioField')
+  final String? gender;
+
   @JsonKey(name: 'dropdownField')
   final String? country;
 
@@ -81,6 +84,7 @@ class UserModel {
     this.birthDate,
     this.termsAccepted = false,
     this.newsletter = false,
+    this.gender,
     this.country,
     this.hobbies = const [],
     this.address,
@@ -133,6 +137,7 @@ class UserModel {
     birthDate: birthDate ?? this.birthDate,
     termsAccepted: termsAccepted ?? this.termsAccepted,
     newsletter: newsletter ?? this.newsletter,
+    gender: gender ?? this.gender,
     country: country ?? this.country,
       hobbies: hobbies ?? this.hobbies,
       address: address ?? this.address,
@@ -149,6 +154,7 @@ class UserModel {
       birthDate: DateTime(1994, 5, 15),
       termsAccepted: true,
       newsletter: true,
+      gender: 'male',
       country: 'IT',
       hobbies: ['reading', 'sports', 'music'],
       address: AddressModel(
@@ -161,6 +167,6 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(fullName: $fullName, email: $email, age: $age, weight: $weight, birthDate: $birthDate, termsAccepted: $termsAccepted, newsletter: $newsletter, country: $country, hobbies: $hobbies, address: $address)';
+    return 'UserModel(fullName: $fullName, email: $email, age: $age, weight: $weight, birthDate: $birthDate, termsAccepted: $termsAccepted, newsletter: $newsletter, gender: $gender, country: $country, hobbies: $hobbies, address: $address)';
   }
 }
