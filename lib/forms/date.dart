@@ -83,10 +83,20 @@ class DateForm extends TextForm<String> {
 
   @override
   bool validate(String? value) {
+    if (!isRequired) return true;
     DateTime? date = _parseDate(value);
-    return !isRequired || (date != null
-        && date.millisecondsSinceEpoch >= _minDate.millisecondsSinceEpoch
-        && date.millisecondsSinceEpoch <= _maxDate.millisecondsSinceEpoch
-        && (isValid == null || isValid!(value)));
+    if (date == null) return false;
+    
+    // Use minValue/maxValue (strings) for consistency, parsing when needed
+    DateTime? minDateValue = _parseDate(minValue);
+    DateTime? maxDateValue = _parseDate(maxValue);
+    
+    // Fallback to _minDate/_maxDate if parsing fails
+    final min = minDateValue ?? _minDate;
+    final max = maxDateValue ?? _maxDate;
+    
+    return date.millisecondsSinceEpoch >= min.millisecondsSinceEpoch
+        && date.millisecondsSinceEpoch <= max.millisecondsSinceEpoch
+        && (isValid == null || isValid!(value));
   }
 }
