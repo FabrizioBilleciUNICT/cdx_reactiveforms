@@ -60,6 +60,9 @@ class UserModel {
   @JsonKey(name: 'booleanField')
   final bool termsAccepted;
 
+  @JsonKey(name: 'checkboxField')
+  final bool newsletter;
+
   @JsonKey(name: 'dropdownField')
   final String? country;
 
@@ -77,6 +80,7 @@ class UserModel {
     this.weight,
     this.birthDate,
     this.termsAccepted = false,
+    this.newsletter = false,
     this.country,
     this.hobbies = const [],
     this.address,
@@ -126,9 +130,10 @@ class UserModel {
       password: password ?? this.password,
       age: age ?? this.age,
       weight: weight ?? this.weight,
-      birthDate: birthDate ?? this.birthDate,
-      termsAccepted: termsAccepted ?? this.termsAccepted,
-      country: country ?? this.country,
+    birthDate: birthDate ?? this.birthDate,
+    termsAccepted: termsAccepted ?? this.termsAccepted,
+    newsletter: newsletter ?? this.newsletter,
+    country: country ?? this.country,
       hobbies: hobbies ?? this.hobbies,
       address: address ?? this.address,
     );
@@ -143,6 +148,7 @@ class UserModel {
       weight: 75.5,
       birthDate: DateTime(1994, 5, 15),
       termsAccepted: true,
+      newsletter: true,
       country: 'IT',
       hobbies: ['reading', 'sports', 'music'],
       address: AddressModel(
@@ -155,6 +161,6 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(fullName: $fullName, email: $email, age: $age, weight: $weight, birthDate: $birthDate, termsAccepted: $termsAccepted, country: $country, hobbies: $hobbies, address: $address)';
+    return 'UserModel(fullName: $fullName, email: $email, age: $age, weight: $weight, birthDate: $birthDate, termsAccepted: $termsAccepted, newsletter: $newsletter, country: $country, hobbies: $hobbies, address: $address)';
   }
 }

@@ -7,6 +7,7 @@ import 'package:cdx_core/core/services/app/itheme_service.dart';
 import 'package:get_it/get_it.dart';
 import 'package:cdx_reactiveforms/controllers/form_controller.dart';
 import 'package:cdx_reactiveforms/forms/boolean.dart';
+import 'package:cdx_reactiveforms/forms/checkbox.dart';
 import 'package:cdx_reactiveforms/forms/date.dart';
 import 'package:cdx_reactiveforms/forms/dropdown.dart';
 import 'package:cdx_reactiveforms/forms/email.dart';
@@ -177,6 +178,12 @@ class _FormsExamplePageState extends State<FormsExamplePage> {
         initialValue: false,
         isRequired: true,
       ),
+      'checkboxField': CheckboxForm(
+        hint: 'I want to receive newsletter updates',
+        label: 'Newsletter',
+        initialValue: false,
+        isRequired: false,
+      ),
       'dropdownField': DropdownForm<String>(
         hint: 'Select your country',
         label: 'Country',
@@ -334,6 +341,7 @@ class _FormsExamplePageState extends State<FormsExamplePage> {
     }
     
     (forms['booleanField'] as BooleanForm?)?.changeValue(model.termsAccepted);
+    (forms['checkboxField'] as CheckboxForm?)?.changeValue(model.newsletter);
     (forms['dropdownField'] as DropdownForm<String>?)?.changeValue(model.country);
     (forms['multiselectField'] as SelectableForm<String>?)?.changeValue(model.hobbies);
 

@@ -27,16 +27,16 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   weight: (json['doubleNumberField'] as num?)?.toDouble(),
   birthDate: UserModel._dateFromJson(json['dateField'] as String?),
   termsAccepted: json['booleanField'] as bool? ?? false,
+  newsletter: json['checkboxField'] as bool? ?? false,
   country: json['dropdownField'] as String?,
   hobbies:
       (json['multiselectField'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList() ??
       const [],
-  address:
-      json['address'] == null
-          ? null
-          : AddressModel.fromJson(json['address'] as Map<String, dynamic>),
+  address: json['address'] == null
+      ? null
+      : AddressModel.fromJson(json['address'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
@@ -47,6 +47,7 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'doubleNumberField': instance.weight,
   'dateField': UserModel._dateToJson(instance.birthDate),
   'booleanField': instance.termsAccepted,
+  'checkboxField': instance.newsletter,
   'dropdownField': instance.country,
   'multiselectField': instance.hobbies,
   'address': instance.address,

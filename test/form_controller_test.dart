@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cdx_reactiveforms/controllers/form_controller.dart';
 import 'package:cdx_reactiveforms/forms/boolean.dart';
+import 'package:cdx_reactiveforms/forms/checkbox.dart';
 import 'package:cdx_reactiveforms/forms/date.dart';
 import 'package:cdx_reactiveforms/forms/dropdown.dart';
 import 'package:cdx_reactiveforms/forms/email.dart';
@@ -121,6 +122,12 @@ void main() {
           initialValue: false,
           isRequired: true,
         ),
+        'checkboxField': CheckboxForm(
+          hint: 'I want to receive newsletter updates',
+          label: 'Newsletter',
+          initialValue: false,
+          isRequired: false,
+        ),
         'dropdownField': DropdownForm<String>(
           hint: 'Select your country',
           label: 'Country',
@@ -190,6 +197,7 @@ void main() {
       formController.forms['doubleNumberField']?.changeValue('75.5');
       formController.forms['dateField']?.changeValue('15/05/1994');
       formController.forms['booleanField']?.changeValue(true);
+      formController.forms['checkboxField']?.changeValue(true);
       formController.forms['dropdownField']?.changeValue('IT');
       formController.forms['multiselectField']?.changeValue(['reading', 'sports']);
 
@@ -210,6 +218,7 @@ void main() {
       expect(values['doubleNumberField'], 75.5);
       expect(values['dateField'], isA<DateTime>());
       expect(values['booleanField'], true);
+      expect(values['checkboxField'], true);
       expect(values['dropdownField'], 'IT');
       expect(values['multiselectField'], ['reading', 'sports']);
 
@@ -230,6 +239,7 @@ void main() {
       expect(formController.forms['textField']?.currentValue(), '');
       expect(formController.forms['emailField']?.currentValue(), '');
       expect(formController.forms['booleanField']?.currentValue(), false);
+      expect(formController.forms['checkboxField']?.currentValue(), false);
     });
 
     test('Form should reset all fields to initial values', () {
@@ -411,6 +421,27 @@ void main() {
       booleanForm.changeValue(true);
       expect(booleanForm.currentValue(), true);
       expect(booleanForm.validate(booleanForm.currentValue()), true);
+    });
+
+    test('Form should handle checkbox field', () {
+      final checkboxForm = formController.forms['checkboxField'] as CheckboxForm;
+      
+      // Initial value is false, and form is not required
+      expect(checkboxForm.isRequired, false);
+      expect(checkboxForm.currentValue(), false);
+      // Checkbox validation: when not required, false is valid
+      expect(checkboxForm.validate(checkboxForm.currentValue()), true);
+
+      // When true, should be valid
+      checkboxForm.changeValue(true);
+      expect(checkboxForm.currentValue(), true);
+      expect(checkboxForm.validate(checkboxForm.currentValue()), true);
+      
+      // Test that checkbox requires true when required
+      checkboxForm.changeValue(false);
+      expect(checkboxForm.currentValue(), false);
+      // Since isRequired=false, false is valid
+      expect(checkboxForm.validate(checkboxForm.currentValue()), true);
     });
 
     test('Form should add and remove forms dynamically', () {
