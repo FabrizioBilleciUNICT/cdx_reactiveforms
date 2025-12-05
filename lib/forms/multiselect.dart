@@ -3,9 +3,10 @@ import 'package:cdx_core/injector.dart';
 import 'package:flutter/material.dart';
 import '../forms/base_form.dart';
 import '../models/dropdown_item.dart';
+import '../models/disposable.dart';
 import '../models/types.dart';
 
-class SelectableForm<K> extends BaseForm<List<K>, List<K>> {
+class SelectableForm<K> extends BaseForm<List<K>, List<K>> with Disposable {
   final Stream<List<DropdownItem<K>>> optionsStream;
   final FocusNode? focusNode;
   final int? minSize;
@@ -14,7 +15,7 @@ class SelectableForm<K> extends BaseForm<List<K>, List<K>> {
 
   final List<K> _initialValue;
   List<K> _selectedValues = [];
-  List<DropdownItem<K>> _options = [];
+  final ValueNotifier<List<DropdownItem<K>>> _optionsNotifier = ValueNotifier([]);
   StreamSubscription<List<DropdownItem<K>>>? _subscription;
 
   SelectableForm({
@@ -42,14 +43,17 @@ class SelectableForm<K> extends BaseForm<List<K>, List<K>> {
         super(type: FormsType.multiselect) {
     valueNotifier.value = initialValue;
     _subscription = optionsStream.listen((list) {
-      _options = list;
-      _selectedValues.removeWhere((sel) => !_options.any((opt) => opt.value == sel));
+      if (list.isNotEmpty) {
+        _optionsNotifier.value = list;
+      }
+      _selectedValues.removeWhere((sel) => !list.any((opt) => opt.value == sel));
       valueNotifier.value = List.from(_selectedValues);
     });
   }
 
   void dispose() {
     _subscription?.cancel();
+    _optionsNotifier.dispose();
   }
 
   @override
@@ -94,28 +98,27 @@ class SelectableForm<K> extends BaseForm<List<K>, List<K>> {
 
   @override
   Widget build(BuildContext context, ValueListenableBuilder<String> Function() errorBuilder) {
-    return StreamBuilder<List<DropdownItem<K>>>(
-      stream: optionsStream,
-      builder: (context, snapshot) {
-        final items = snapshot.data ?? [];
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            labelWidget(),
-            ValueListenableBuilder(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        labelWidget(),
+        ValueListenableBuilder<List<DropdownItem<K>>>(
+          valueListenable: _optionsNotifier,
+          builder: (context, items, child) {
+            return ValueListenableBuilder(
               valueListenable: valueNotifier,
               builder: (context, value, child) => _buildOptionsList(context, items),
-            ),
-            ValueListenableBuilder(
-              valueListenable: showErrorNotifier,
-              builder: (context, show, child) {
-                if (!show) return const SizedBox();
-                return errorBuilder();
-              },
-            ),
-          ],
-        );
-      },
+            );
+          },
+        ),
+        ValueListenableBuilder(
+          valueListenable: showErrorNotifier,
+          builder: (context, show, child) {
+            if (!show) return const SizedBox();
+            return errorBuilder();
+          },
+        ),
+      ],
     );
   }
 
@@ -131,7 +134,7 @@ class SelectableForm<K> extends BaseForm<List<K>, List<K>> {
 
           return GestureDetector(
             onTap: editable ? () {
-              final max = maxSize ?? _options.length;
+              final max = maxSize ?? _optionsNotifier.value.length;
 
               if (selected) {
                 if (_selectedValues.length > (minSize ?? 0)) {
@@ -182,6 +185,14 @@ class SelectableForm<K> extends BaseForm<List<K>, List<K>> {
 
   @override
   Widget buildInput(BuildContext context) {
-    return _buildOptionsList(context, _options);
+    return ValueListenableBuilder<List<DropdownItem<K>>>(
+      valueListenable: _optionsNotifier,
+      builder: (context, items, child) {
+        return ValueListenableBuilder(
+          valueListenable: valueNotifier,
+          builder: (context, value, child) => _buildOptionsList(context, items),
+        );
+      },
+    );
   }
 }

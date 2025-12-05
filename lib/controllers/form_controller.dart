@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/iform.dart';
+import '../models/disposable.dart';
+import '../models/inested_form.dart';
 import '../models/types.dart';
+import '../forms/array.dart';
 
 class FormController<T> {
   final Map<String, IForm> _formMap;
@@ -39,16 +42,8 @@ class FormController<T> {
   }
 
   void _showErrorsRecursive(IForm form) {
-    if (form.type == FormsType.nested) {
-      try {
-        final nestedForm = form;
-        final innerController = (nestedForm as dynamic).innerController;
-        if (innerController is FormController) {
-          innerController.showErrors();
-        }
-      } catch (e) {
-        // Ignore if innerController is not available
-      }
+    if (form is INestedForm) {
+      form.innerController.showErrors();
     }
   }
 
@@ -56,6 +51,16 @@ class FormController<T> {
     bool overallValid = true;
     for (var entry in _formMap.entries) {
       final form = entry.value;
+      // Explicitly validate nested and array forms to update their internal isValid status
+      if (form is INestedForm) {
+        form.innerController.validateAll(showErrors: showErrors);
+      } else if (form.type == FormsType.customArray) {
+        final arrayForm = form as ArrayForm;
+        for (var controller in arrayForm.itemControllers) {
+          controller.validateAll(showErrors: showErrors);
+        }
+      }
+      
       if (!_isValid(form)) {
         overallValid = false;
         if (showErrors) {
@@ -117,6 +122,10 @@ class FormController<T> {
   void dispose() {
     for (var form in _formMap.values) {
       form.valueNotifier.removeListener(_updateValidStatus);
+      // Dispose forms that have resources (streams, subscriptions, etc.)
+      if (form is Disposable) {
+        (form as Disposable).dispose();
+      }
     }
     isValid.dispose();
   }

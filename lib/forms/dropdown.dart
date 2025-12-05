@@ -3,9 +3,10 @@ import 'package:cdx_reactiveforms/ui/components.dart';
 import 'package:flutter/material.dart';
 import '../forms/base_form.dart';
 import '../models/dropdown_item.dart';
+import '../models/disposable.dart';
 import '../models/types.dart';
 
-class DropdownForm<K> extends BaseForm<K, K> {
+class DropdownForm<K> extends BaseForm<K, K> with Disposable {
   final K? _initialValue;
   final Stream<List<DropdownItem<K>>> optionsStream;
   final FocusNode? focusNode;
@@ -95,38 +96,24 @@ class DropdownForm<K> extends BaseForm<K, K> {
 
   @override
   Widget build(BuildContext context, ValueListenableBuilder<String> Function() errorBuilder) {
-    return StreamBuilder<List<DropdownItem<K>>>(
-      stream: optionsStream,
-      builder: (context, snapshot) {
-        // Update ValueNotifier if we receive data from stream
-        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (_optionsNotifier.value.isEmpty || _optionsNotifier.value != snapshot.data) {
-              _optionsNotifier.value = snapshot.data!;
-            }
-          });
-        }
-        
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            labelWidget(),
-            ValueListenableBuilder<List<DropdownItem<K>>>(
-              valueListenable: _optionsNotifier,
-              builder: (context, items, child) {
-                return _buildDropdown(items);
-              },
-            ),
-            ValueListenableBuilder(
-              valueListenable: showErrorNotifier,
-              builder: (context, show, child) {
-                if (!show) return const SizedBox();
-                return errorBuilder();
-              }
-            )
-          ],
-        );
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        labelWidget(),
+        ValueListenableBuilder<List<DropdownItem<K>>>(
+          valueListenable: _optionsNotifier,
+          builder: (context, items, child) {
+            return _buildDropdown(items);
+          },
+        ),
+        ValueListenableBuilder(
+          valueListenable: showErrorNotifier,
+          builder: (context, show, child) {
+            if (!show) return const SizedBox();
+            return errorBuilder();
+          }
+        )
+      ],
     );
   }
 

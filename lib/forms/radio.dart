@@ -2,9 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../forms/base_form.dart';
 import '../models/dropdown_item.dart';
+import '../models/disposable.dart';
 import '../models/types.dart';
 
-class RadioForm<K> extends BaseForm<K, K> {
+class RadioForm<K> extends BaseForm<K, K> with Disposable {
   final K? _initialValue;
   final Stream<List<DropdownItem<K>>> optionsStream;
   final FocusNode? focusNode;

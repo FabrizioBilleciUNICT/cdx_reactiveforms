@@ -2,12 +2,13 @@ import 'package:cdx_core/injector.dart';
 import 'package:cdx_reactiveforms/controllers/form_controller.dart';
 import 'package:cdx_reactiveforms/forms/base_form.dart';
 import 'package:cdx_reactiveforms/models/iform.dart';
+import 'package:cdx_reactiveforms/models/disposable.dart';
 import 'package:cdx_reactiveforms/models/types.dart';
 import 'package:cdx_reactiveforms/ui/delegate.dart';
 import 'package:cdx_reactiveforms/ui/layout_simple.dart';
 import 'package:flutter/material.dart';
 
-class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dynamic>>> {
+class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dynamic>>> with Disposable {
   final List<FormController> _itemControllers = [];
   final FormBuilderDelegate? layoutDelegate;
   final FieldBuilder? fieldBuilder;
