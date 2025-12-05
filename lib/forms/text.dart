@@ -116,7 +116,7 @@ class TextForm<K> extends IForm<String, K> {
   }
   
   @override
-  Widget build(BuildContext context, ValueListenableBuilder<String> Function() errorBuilder) {
+  Widget build(BuildContext context, ValueListenableBuilder<String> Function()? errorBuilder) {
     return Column(
       children: [
         labelWidget(),
@@ -126,13 +126,14 @@ class TextForm<K> extends IForm<String, K> {
               return input(context, obscureText);
             }
         ),
-        ValueListenableBuilder(
-            valueListenable: showErrorNotifier,
-            builder: (context, value, child) {
-              if (!value) return const SizedBox();
-              return errorBuilder();
-            }
-        )
+        if (errorBuilder != null)
+          ValueListenableBuilder(
+              valueListenable: showErrorNotifier,
+              builder: (context, value, child) {
+                if (!value) return const SizedBox();
+                return errorBuilder();
+              }
+          )
       ],
     );
   }

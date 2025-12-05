@@ -134,6 +134,8 @@ class DoubleNumberForm extends TextForm<double> {
 
   @override
   bool validate(String? value) {
-    return !isRequired || super.validate(value);
+    final v = inputTransform(value);
+    return !isRequired || (value?.trim().isNotEmpty == true && ((v >= minValue! && v <= maxValue!) &&
+        (isValid == null || isValid!(value))));
   }
 }
