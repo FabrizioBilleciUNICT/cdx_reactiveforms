@@ -30,7 +30,10 @@ class FormController<T> {
         break;
       }
     }
-    isValid.value = overallValid;
+    // Only update if value actually changed to avoid unnecessary rebuilds
+    if (isValid.value != overallValid) {
+      isValid.value = overallValid;
+    }
   }
 
   void showErrors() {
@@ -71,7 +74,10 @@ class FormController<T> {
         }
       }
     }
-    isValid.value = overallValid;
+    // Only update if value actually changed to avoid unnecessary rebuilds
+    if (isValid.value != overallValid) {
+      isValid.value = overallValid;
+    }
     return overallValid;
   }
 

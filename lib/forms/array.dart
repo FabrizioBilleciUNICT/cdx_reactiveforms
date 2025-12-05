@@ -18,6 +18,7 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
   final int? minItems;
   final int? maxItems;
   final Map<String, IForm> Function() itemFormFactory;
+  final Map<FormController, int> _itemControllerFormCounts = {};
 
   ArrayForm({
     required super.hint,
@@ -71,14 +72,35 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
     controller.isValid.addListener(_onItemChange);
     _syncItemControllerListeners(controller);
     _itemControllers.add(controller);
+    // Initialize form count tracking for this controller
+    _itemControllerFormCounts[controller] = controller.forms.length;
     _onItemChange();
   }
 
   void _syncItemControllerListeners(FormController controller) {
+    // Only sync if form count changed for this controller to avoid unnecessary work
+    final currentFormCount = controller.forms.length;
+    final lastFormCount = _itemControllerFormCounts[controller] ?? 0;
+    
+    if (currentFormCount == lastFormCount) {
+      return;
+    }
+    _itemControllerFormCounts[controller] = currentFormCount;
+    
     // Ensure all forms in the controller have listeners registered
     for (var form in controller.forms.values) {
+      // Note: addListener is idempotent in Flutter, so calling it multiple times is safe
       form.valueNotifier.addListener(_onItemChange);
     }
+  }
+
+  void _disposeItemController(FormController controller) {
+    controller.isValid.removeListener(_onItemChange);
+    for (var form in controller.forms.values) {
+      form.valueNotifier.removeListener(_onItemChange);
+    }
+    _itemControllerFormCounts.remove(controller);
+    controller.dispose();
   }
 
   void removeItem(int index) {
@@ -86,11 +108,7 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
     if (minItems != null && _itemControllers.length <= minItems!) return;
 
     final controller = _itemControllers.removeAt(index);
-    controller.isValid.removeListener(_onItemChange);
-    for (var form in controller.forms.values) {
-      form.valueNotifier.removeListener(_onItemChange);
-    }
-    controller.dispose();
+    _disposeItemController(controller);
     _onItemChange();
   }
 
@@ -201,13 +219,10 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
 
     // Optimize: clear existing items at once instead of one by one (O(n) instead of O(n²))
     for (var controller in _itemControllers) {
-      controller.isValid.removeListener(_onItemChange);
-      for (var form in controller.forms.values) {
-        form.valueNotifier.removeListener(_onItemChange);
-      }
-      controller.dispose();
+      _disposeItemController(controller);
     }
     _itemControllers.clear();
+    _itemControllerFormCounts.clear();
 
     // Add new items
     for (var itemData in newValue) {
@@ -234,6 +249,7 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
       controller.dispose();
     }
     _itemControllers.clear();
+    _itemControllerFormCounts.clear();
     valueNotifier.value = [];
   }
 
@@ -364,13 +380,10 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
 
   void dispose() {
     for (var controller in _itemControllers) {
-      controller.isValid.removeListener(_onItemChange);
-      for (var form in controller.forms.values) {
-        form.valueNotifier.removeListener(_onItemChange);
-      }
-      controller.dispose();
+      _disposeItemController(controller);
     }
     _itemControllers.clear();
+    _itemControllerFormCounts.clear();
   }
 }
 

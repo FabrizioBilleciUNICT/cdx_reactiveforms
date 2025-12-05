@@ -15,6 +15,7 @@ class NestedForm extends BaseForm<Map<String, dynamic>, Map<String, dynamic>> wi
   final FieldBuilder? fieldBuilder;
   final EdgeInsets? padding;
   final Decoration? containerDecoration;
+  int _lastFormCount = 0;
 
   NestedForm({
     required super.hint,
@@ -41,6 +42,7 @@ class NestedForm extends BaseForm<Map<String, dynamic>, Map<String, dynamic>> wi
     valueNotifier.value = _innerController.getValues();
     _innerController.isValid.addListener(_onInnerFormChange);
     _initInnerFormListeners();
+    _lastFormCount = _innerController.forms.length;
   }
 
   void _initInnerFormListeners() {
@@ -50,14 +52,16 @@ class NestedForm extends BaseForm<Map<String, dynamic>, Map<String, dynamic>> wi
   }
 
   void _syncInnerFormListeners() {
+    // Only sync if form count changed to avoid unnecessary work
+    final currentFormCount = _innerController.forms.length;
+    if (currentFormCount == _lastFormCount) {
+      return;
+    }
+    _lastFormCount = currentFormCount;
+    
     // Re-sync listeners in case forms were added dynamically
-    final currentForms = _innerController.forms.values.toSet();
-    // Note: This is a simple approach. In practice, forms added via innerController.addForm()
-    // should call this method or the listener should be added manually.
-    // For now, we ensure all current forms have listeners registered.
-    for (var form in currentForms) {
-      // Note: addListener is idempotent in Flutter, but we check to avoid duplicates
-      // In practice, if a form already has the listener, it won't be added again
+    for (var form in _innerController.forms.values) {
+      // Note: addListener is idempotent in Flutter, so calling it multiple times is safe
       form.valueNotifier.addListener(_onInnerFormChange);
     }
   }
