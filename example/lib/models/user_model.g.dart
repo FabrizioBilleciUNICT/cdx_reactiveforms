@@ -21,6 +21,7 @@ Map<String, dynamic> _$AddressModelToJson(AddressModel instance) =>
 
 UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   fullName: json['textField'] as String?,
+  bio: json['multilineField'] as String?,
   email: json['emailField'] as String?,
   password: json['passwordField'] as String?,
   age: (json['intNumberField'] as num?)?.toInt(),
@@ -42,6 +43,7 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'textField': instance.fullName,
+  'multilineField': instance.bio,
   'emailField': instance.email,
   'passwordField': instance.password,
   'intNumberField': instance.age,

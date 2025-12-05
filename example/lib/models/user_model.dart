@@ -42,6 +42,9 @@ class UserModel {
   @JsonKey(name: 'textField')
   final String? fullName;
 
+  @JsonKey(name: 'multilineField')
+  final String? bio;
+
   @JsonKey(name: 'emailField')
   final String? email;
 
@@ -77,6 +80,7 @@ class UserModel {
 
   UserModel({
     this.fullName,
+    this.bio,
     this.email,
     this.password,
     this.age,
@@ -130,6 +134,7 @@ class UserModel {
   }) {
     return UserModel(
       fullName: fullName ?? this.fullName,
+      bio: bio ?? this.bio,
       email: email ?? this.email,
       password: password ?? this.password,
       age: age ?? this.age,
@@ -147,6 +152,7 @@ class UserModel {
   static UserModel getExample() {
     return UserModel(
       fullName: 'Mario Rossi',
+      bio: 'Software developer passionate about Flutter and mobile development. Love creating beautiful and functional applications.',
       email: 'mario.rossi@example.com',
       password: 'SecurePass123!',
       age: 30,
@@ -167,6 +173,6 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(fullName: $fullName, email: $email, age: $age, weight: $weight, birthDate: $birthDate, termsAccepted: $termsAccepted, newsletter: $newsletter, gender: $gender, country: $country, hobbies: $hobbies, address: $address)';
+    return 'UserModel(fullName: $fullName, bio: $bio, email: $email, age: $age, weight: $weight, birthDate: $birthDate, termsAccepted: $termsAccepted, newsletter: $newsletter, gender: $gender, country: $country, hobbies: $hobbies, address: $address)';
   }
 }

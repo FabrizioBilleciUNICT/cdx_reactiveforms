@@ -6,6 +6,7 @@ import 'package:cdx_reactiveforms/forms/checkbox.dart';
 import 'package:cdx_reactiveforms/forms/date.dart';
 import 'package:cdx_reactiveforms/forms/dropdown.dart';
 import 'package:cdx_reactiveforms/forms/email.dart';
+import 'package:cdx_reactiveforms/forms/multiline.dart';
 import 'package:cdx_reactiveforms/forms/multiselect.dart';
 import 'package:cdx_reactiveforms/forms/nested.dart';
 import 'package:cdx_reactiveforms/forms/numeric.dart';
@@ -86,6 +87,14 @@ void main() {
           label: 'Full Name',
           initialValue: null,
           isRequired: true,
+        ),
+        'multilineField': MultilineForm<String>(
+          hint: 'Enter your bio or description',
+          label: 'Bio',
+          initialValue: null,
+          isRequired: false,
+          minLines: 3,
+          maxLines: 6,
         ),
         'emailField': EmailForm(
           hint: 'Enter your email',
@@ -210,6 +219,7 @@ void main() {
     test('Form should return correct values', () async {
       // Fill all fields
       formController.forms['textField']?.changeValue('John Doe');
+      formController.forms['multilineField']?.changeValue('This is a multiline bio text');
       formController.forms['emailField']?.changeValue('john.doe@example.com');
       formController.forms['passwordField']?.changeValue('Password123!');
       formController.forms['intNumberField']?.changeValue('30');
@@ -258,6 +268,7 @@ void main() {
       formController.clearAll();
 
       expect(formController.forms['textField']?.currentValue(), '');
+      expect(formController.forms['multilineField']?.currentValue(), '');
       expect(formController.forms['emailField']?.currentValue(), '');
       expect(formController.forms['booleanField']?.currentValue(), false);
       expect(formController.forms['checkboxField']?.currentValue(), false);
@@ -448,6 +459,24 @@ void main() {
       // Date out of range
       dateForm.changeValue('01/01/1800');
       expect(dateForm.validate(dateForm.currentValue()), false);
+    });
+
+    test('Form should handle multiline field', () {
+      final multilineForm = formController.forms['multilineField'] as MultilineForm<String>;
+      
+      // Optional field should be valid when empty
+      expect(multilineForm.isRequired, false);
+      expect(multilineForm.validate(multilineForm.currentValue()), true);
+
+      // Should validate when filled
+      multilineForm.changeValue('This is a multiline text\nwith multiple lines');
+      expect(multilineForm.currentValue(), 'This is a multiline text\nwith multiple lines');
+      expect(multilineForm.validate(multilineForm.currentValue()), true);
+
+      // Should handle empty string
+      multilineForm.changeValue('');
+      expect(multilineForm.currentValue(), '');
+      expect(multilineForm.validate(multilineForm.currentValue()), true); // Optional field
     });
 
     test('Form should handle boolean field', () {

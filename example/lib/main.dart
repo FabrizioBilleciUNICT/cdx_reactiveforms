@@ -11,6 +11,7 @@ import 'package:cdx_reactiveforms/forms/checkbox.dart';
 import 'package:cdx_reactiveforms/forms/date.dart';
 import 'package:cdx_reactiveforms/forms/dropdown.dart';
 import 'package:cdx_reactiveforms/forms/email.dart';
+import 'package:cdx_reactiveforms/forms/multiline.dart';
 import 'package:cdx_reactiveforms/forms/multiselect.dart';
 import 'package:cdx_reactiveforms/forms/nested.dart';
 import 'package:cdx_reactiveforms/forms/numeric.dart';
@@ -135,6 +136,14 @@ class _FormsExamplePageState extends State<FormsExamplePage> {
         label: 'Full Name',
         initialValue: null,
         isRequired: true,
+      ),
+      'multilineField': MultilineForm<String>(
+        hint: 'Enter your bio or description',
+        label: 'Bio',
+        initialValue: null,
+        isRequired: false,
+        minLines: 3,
+        maxLines: 6,
       ),
       'emailField': EmailForm(
         hint: 'Enter your email',
@@ -337,6 +346,7 @@ class _FormsExamplePageState extends State<FormsExamplePage> {
     final forms = _formController.forms;
 
     (forms['textField'] as TextForm<String>?)?.changeValue(model.fullName ?? '');
+    (forms['multilineField'] as MultilineForm<String>?)?.changeValue(model.bio ?? '');
     (forms['emailField'] as EmailForm?)?.changeValue(model.email ?? '');
     (forms['passwordField'] as PasswordForm?)?.changeValue(model.password ?? '');
     (forms['intNumberField'] as IntNumberForm?)?.changeValue(model.age?.toString() ?? '');
