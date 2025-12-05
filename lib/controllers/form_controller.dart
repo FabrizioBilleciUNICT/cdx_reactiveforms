@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/iform.dart';
+import '../models/types.dart';
 
 class FormController<T> {
   final Map<String, IForm> _formMap;
@@ -33,6 +34,21 @@ class FormController<T> {
   void showErrors() {
     for (var form in _formMap.values) {
       form.showError(true);
+      _showErrorsRecursive(form);
+    }
+  }
+
+  void _showErrorsRecursive(IForm form) {
+    if (form.type == FormsType.nested) {
+      try {
+        final nestedForm = form;
+        final innerController = (nestedForm as dynamic).innerController;
+        if (innerController is FormController) {
+          innerController.showErrors();
+        }
+      } catch (e) {
+        // Ignore if innerController is not available
+      }
     }
   }
 

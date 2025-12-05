@@ -82,7 +82,9 @@ class TextForm<K> extends IForm<String, K> {
 
   @override
   bool validate(String? value) {
-    return !isRequired || (((value?.length ?? 0) >= (minValue?.toString().length ?? 0)) &&
+    if (!isRequired) return true;
+    if (value == null || value.isEmpty) return false;
+    return ((value.length >= (minValue?.toString().length ?? 0)) &&
         (isValid == null || isValid!(value)));
   }
 

@@ -11,7 +11,7 @@ class DropdownForm<K> extends BaseForm<K, K> {
   final FocusNode? focusNode;
 
   K? _currentValue;
-  List<DropdownItem<K>> _options = [];
+  final ValueNotifier<List<DropdownItem<K>>> _optionsNotifier = ValueNotifier([]);
   StreamSubscription<List<DropdownItem<K>>>? _subscription;
 
   DropdownForm({
@@ -37,8 +37,10 @@ class DropdownForm<K> extends BaseForm<K, K> {
         super() {
     valueNotifier.value = initialValue;
     _subscription = optionsStream.listen((list) {
-      _options = list;
-      if (!_options.any((item) => item.value == _currentValue)) {
+      if (list.isNotEmpty) {
+        _optionsNotifier.value = list;
+      }
+      if (!list.any((item) => item.value == _currentValue)) {
         _currentValue = null;
         valueNotifier.value = null;
         errorNotifier.value = '';
@@ -48,6 +50,7 @@ class DropdownForm<K> extends BaseForm<K, K> {
 
   void dispose() {
     _subscription?.cancel();
+    _optionsNotifier.dispose();
   }
 
   @override
@@ -95,12 +98,25 @@ class DropdownForm<K> extends BaseForm<K, K> {
     return StreamBuilder<List<DropdownItem<K>>>(
       stream: optionsStream,
       builder: (context, snapshot) {
-        final items = snapshot.data ?? [];
+        // Update ValueNotifier if we receive data from stream
+        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_optionsNotifier.value.isEmpty || _optionsNotifier.value != snapshot.data) {
+              _optionsNotifier.value = snapshot.data!;
+            }
+          });
+        }
+        
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             labelWidget(),
-            _buildDropdown(items),
+            ValueListenableBuilder<List<DropdownItem<K>>>(
+              valueListenable: _optionsNotifier,
+              builder: (context, items, child) {
+                return _buildDropdown(items);
+              },
+            ),
             ValueListenableBuilder(
               valueListenable: showErrorNotifier,
               builder: (context, show, child) {
@@ -115,6 +131,18 @@ class DropdownForm<K> extends BaseForm<K, K> {
   }
 
   Widget _buildDropdown(List<DropdownItem<K>> items) {
+    if (items.isEmpty) {
+      return DropdownButtonFormField<K>(
+        focusNode: focusNode,
+        value: null,
+        isExpanded: true,
+        onChanged: null,
+        hint: Text(hint, style: theme.hintStyle),
+        decoration: FormComponents.inputDecoration(theme, hint, editable),
+        items: const [],
+      );
+    }
+    
     return DropdownButtonFormField<K>(
       focusNode: focusNode,
       value: _currentValue,
@@ -133,6 +161,11 @@ class DropdownForm<K> extends BaseForm<K, K> {
 
   @override
   Widget buildInput(BuildContext context) {
-    return _buildDropdown(_options);
+    return ValueListenableBuilder<List<DropdownItem<K>>>(
+      valueListenable: _optionsNotifier,
+      builder: (context, items, child) {
+        return _buildDropdown(items);
+      },
+    );
   }
 }

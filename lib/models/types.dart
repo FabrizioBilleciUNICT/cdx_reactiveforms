@@ -1,17 +1,17 @@
 
 
 enum FormsType {
-  text,           //
-  email,          //
-  password,       //
-  multiline,      //
-  number,         //
-  intNumber,      //
-  date,           //
-  boolean,        //
-  // ------------
+  text,
+  email,
+  password,
+  multiline,
+  number,
+  intNumber,
+  date,
+  boolean,
   dropdown,
   multiselect,
+  nested,
   image,
   images,
   checkArray,
