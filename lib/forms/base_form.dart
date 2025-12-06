@@ -1,11 +1,15 @@
 import 'package:cdx_core/core/models/input_theme_data.dart';
 import 'package:cdx_core/injector.dart';
 import 'package:cdx_reactiveforms/models/iform.dart';
+import 'package:cdx_reactiveforms/models/form_localizations.dart';
+import 'package:cdx_reactiveforms/models/form_error_logger.dart';
 import 'package:cdx_reactiveforms/ui/components.dart';
 import 'package:flutter/material.dart';
 
 abstract class BaseForm<T, K> extends IForm<T, K> {
   final String? errorMessageText;
+  final FormLocalizations? localizations;
+  final FormErrorLogger? errorLogger;
   late final CdxInputThemeData theme;
 
   BaseForm({
@@ -23,6 +27,13 @@ abstract class BaseForm<T, K> extends IForm<T, K> {
     ValueNotifier<bool>? showErrorNotifier,
     CdxInputThemeData? themeData,
     this.errorMessageText,
+    this.localizations,
+    this.errorLogger,
+    super.semanticsLabel,
+    super.tooltip,
+    super.hintText,
+    super.visibilityCondition,
+    super.editableCondition,
   }) : super(
     errorNotifier: errorNotifier ?? ValueNotifier(''),
     showErrorNotifier: showErrorNotifier ?? ValueNotifier(false),
@@ -30,13 +41,17 @@ abstract class BaseForm<T, K> extends IForm<T, K> {
   ) {
     theme = themeData ?? DI.theme().inputTheme;
   }
+  
+  FormLocalizations get _localizations => localizations ?? DefaultFormLocalizations();
 
   @override
   void listener(T? value) {
     showError(false);
     final bool valid = validate(value);
     if (!valid) {
-      errorNotifier.value = errorMessage(value);
+      final errorMsg = errorMessage(value);
+      errorNotifier.value = errorMsg;
+      errorLogger?.logValidationError(type.toString(), label, errorMsg);
     } else {
       errorNotifier.value = '';
     }
@@ -45,10 +60,33 @@ abstract class BaseForm<T, K> extends IForm<T, K> {
 
   @override
   String errorMessage(T? value) {
-    return errorMessageText ?? 'This field is not valid';
+    return errorMessageText ?? _localizations.defaultErrorMessage;
   }
 
-  Widget labelWidget() => FormComponents.label(label, theme);
+  Widget labelWidget() {
+    Widget labelWidget = FormComponents.label(label, theme);
+    if (tooltip != null && tooltip!.isNotEmpty) {
+      labelWidget = Tooltip(
+        message: tooltip!,
+        child: labelWidget,
+      );
+    }
+    return labelWidget;
+  }
+
+  /// Wraps the input widget with Semantics for accessibility
+  Widget wrapWithSemantics(Widget input) {
+    final effectiveLabel = semanticsLabel ?? label;
+    final effectiveHint = hintText ?? hint;
+    
+    return Semantics(
+      label: effectiveLabel,
+      hint: effectiveHint,
+      value: valueNotifier.value?.toString() ?? '',
+      enabled: editable,
+      child: input,
+    );
+  }
 
   @override
   Widget build(BuildContext context, ValueListenableBuilder<String> Function() errorBuilder) {
@@ -56,7 +94,7 @@ abstract class BaseForm<T, K> extends IForm<T, K> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         labelWidget(),
-        buildInput(context),
+        wrapWithSemantics(buildInput(context)),
         ValueListenableBuilder(
           valueListenable: showErrorNotifier,
           builder: (context, show, child) {

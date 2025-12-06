@@ -137,6 +137,10 @@ class FormController<T> {
     final IForm? form = _formMap.remove(key);
     if (form != null) {
       form.valueNotifier.removeListener(_updateValidStatus);
+      // Dispose form if it has resources
+      if (form is Disposable) {
+        (form as Disposable).dispose();
+      }
       _updateValidStatus();
     }
   }

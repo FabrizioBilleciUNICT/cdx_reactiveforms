@@ -4,6 +4,7 @@ import 'package:cdx_reactiveforms/forms/base_form.dart';
 import 'package:cdx_reactiveforms/models/iform.dart';
 import 'package:cdx_reactiveforms/models/disposable.dart';
 import 'package:cdx_reactiveforms/models/inested_form.dart';
+import 'package:cdx_reactiveforms/models/form_localizations.dart';
 import 'package:cdx_reactiveforms/models/types.dart';
 import 'package:cdx_reactiveforms/ui/delegate.dart';
 import 'package:cdx_reactiveforms/ui/layout_simple.dart';
@@ -32,7 +33,11 @@ class NestedForm extends BaseForm<Map<String, dynamic>, Map<String, dynamic>> wi
     super.errorNotifier,
     super.showErrorNotifier,
     super.themeData,
-    super.errorMessageText = 'This nested form is not valid',
+    super.errorMessageText,
+    super.localizations,
+    super.semanticsLabel,
+    super.tooltip,
+    super.hintText,
     this.layoutDelegate,
     this.fieldBuilder,
     this.padding,
@@ -95,6 +100,11 @@ class NestedForm extends BaseForm<Map<String, dynamic>, Map<String, dynamic>> wi
       return innerValid && isValid!(value);
     }
     return innerValid;
+  }
+
+  @override
+  String errorMessage(Map<String, dynamic>? value) {
+    return errorMessageText ?? (localizations ?? DefaultFormLocalizations()).nestedFormErrorMessage;
   }
 
   @override

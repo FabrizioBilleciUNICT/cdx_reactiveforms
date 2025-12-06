@@ -1,4 +1,5 @@
 import 'package:cdx_reactiveforms/models/types.dart';
+import 'package:cdx_reactiveforms/models/conditional_field.dart';
 import 'package:flutter/material.dart';
 
 abstract class IForm<T, K> {
@@ -15,6 +16,11 @@ abstract class IForm<T, K> {
   final K? minValue;
   final K? maxValue;
   final bool Function(T? value)? isValid;
+  final String? semanticsLabel;
+  final String? tooltip;
+  final String? hintText;
+  final FieldCondition? visibilityCondition;
+  final FieldCondition? editableCondition;
 
   void showError(bool show) {
     showErrorNotifier.value = show;
@@ -47,5 +53,10 @@ abstract class IForm<T, K> {
     required this.maxValue,
     required this.valueNotifier,
     this.isValid,
+    this.semanticsLabel,
+    this.tooltip,
+    this.hintText,
+    this.visibilityCondition,
+    this.editableCondition,
   });
 }

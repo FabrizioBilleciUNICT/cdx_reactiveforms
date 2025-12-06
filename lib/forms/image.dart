@@ -3,11 +3,12 @@ import 'dart:io';
 import 'package:cdx_core/injector.dart';
 import 'package:cdx_reactiveforms/forms/base_form.dart';
 import 'package:cdx_reactiveforms/models/disposable.dart';
+import 'package:cdx_reactiveforms/models/form_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/types.dart';
 
 class ImageForm extends BaseForm<String?, String?> with Disposable {
-  final String messageError;
+  final String? messageError;
   final List<String>? allowedFormats;
   final int? maxSizeBytes;
   final Future<File?> Function()? imagePicker;
@@ -24,7 +25,7 @@ class ImageForm extends BaseForm<String?, String?> with Disposable {
     super.editable = true,
     super.visible,
     required String? initialValue,
-    required this.messageError,
+    this.messageError,
     this.allowedFormats,
     this.maxSizeBytes,
     this.imagePicker,
@@ -34,6 +35,10 @@ class ImageForm extends BaseForm<String?, String?> with Disposable {
     super.errorNotifier,
     super.showErrorNotifier,
     super.themeData,
+    super.localizations,
+    super.semanticsLabel,
+    super.tooltip,
+    super.hintText,
   }) : _initialValue = initialValue,
         super(
     minValue: null,
@@ -83,7 +88,8 @@ class ImageForm extends BaseForm<String?, String?> with Disposable {
       final allowed = allowedFormats ?? ['jpg', 'jpeg', 'png', 'gif', 'webp'];
       final extension = file.path.split('.').last.toLowerCase();
       if (!allowed.any((format) => format.toLowerCase() == extension)) {
-        errorNotifier.value = 'Image format not allowed. Allowed: ${allowed.join(", ")}';
+        final loc = localizations ?? DefaultFormLocalizations();
+        errorNotifier.value = loc.imageFormatErrorMessage(allowed);
         showError(true);
         return;
       }
@@ -92,17 +98,20 @@ class ImageForm extends BaseForm<String?, String?> with Disposable {
       if (maxSizeBytes != null) {
         final fileSize = await file.length();
         if (fileSize > maxSizeBytes!) {
-          final maxSizeMB = (maxSizeBytes! / (1024 * 1024)).toStringAsFixed(2);
-          errorNotifier.value = 'Image size exceeds maximum allowed size of ${maxSizeMB}MB';
+          final maxSizeMB = maxSizeBytes! / (1024 * 1024);
+          final loc = localizations ?? DefaultFormLocalizations();
+          errorNotifier.value = loc.imageSizeErrorMessage(maxSizeMB);
           showError(true);
           return;
         }
       }
 
       changeValue(file.path);
-    } catch (e) {
-      errorNotifier.value = 'Error handling dropped image: $e';
+    } catch (e, stackTrace) {
+      final loc = localizations ?? DefaultFormLocalizations();
+      errorNotifier.value = '${loc.defaultErrorMessage}: $e';
       showError(true);
+      errorLogger?.logError(type.toString(), label, e, stackTrace);
     }
   }
 
@@ -115,9 +124,11 @@ class ImageForm extends BaseForm<String?, String?> with Disposable {
       if (file != null) {
         await _handleDroppedFile(file);
       }
-    } catch (e) {
-      errorNotifier.value = 'Error selecting image: $e';
+    } catch (e, stackTrace) {
+      final loc = localizations ?? DefaultFormLocalizations();
+      errorNotifier.value = '${loc.defaultErrorMessage}: $e';
       showError(true);
+      errorLogger?.logError(type.toString(), label, e, stackTrace);
     }
   }
 
@@ -144,7 +155,7 @@ class ImageForm extends BaseForm<String?, String?> with Disposable {
 
   @override
   String errorMessage(String? value) {
-    return messageError;
+    return messageError ?? (localizations ?? DefaultFormLocalizations()).defaultErrorMessage;
   }
 
   @override

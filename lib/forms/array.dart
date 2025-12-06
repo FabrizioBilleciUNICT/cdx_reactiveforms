@@ -4,6 +4,7 @@ import 'package:cdx_reactiveforms/forms/base_form.dart';
 import 'package:cdx_reactiveforms/models/iform.dart';
 import 'package:cdx_reactiveforms/models/disposable.dart';
 import 'package:cdx_reactiveforms/models/iarray_form.dart';
+import 'package:cdx_reactiveforms/models/form_localizations.dart';
 import 'package:cdx_reactiveforms/models/types.dart';
 import 'package:cdx_reactiveforms/ui/delegate.dart';
 import 'package:cdx_reactiveforms/ui/layout_simple.dart';
@@ -19,6 +20,10 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
   final int? maxItems;
   final Map<String, IForm> Function() itemFormFactory;
   final Map<FormController, int> _itemControllerFormCounts = {};
+  
+  // Cache for _getValues() to avoid unnecessary recalculations
+  List<Map<String, dynamic>>? _cachedValues;
+  int _cachedItemCount = -1;
 
   ArrayForm({
     required super.hint,
@@ -35,7 +40,11 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
     super.errorNotifier,
     super.showErrorNotifier,
     super.themeData,
-    super.errorMessageText = 'This array form is not valid',
+    super.errorMessageText,
+    super.localizations,
+    super.semanticsLabel,
+    super.tooltip,
+    super.hintText,
     this.layoutDelegate,
     this.fieldBuilder,
     this.padding,
@@ -74,6 +83,9 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
     _itemControllers.add(controller);
     // Initialize form count tracking for this controller
     _itemControllerFormCounts[controller] = controller.forms.length;
+    // Invalidate cache
+    _cachedValues = null;
+    _cachedItemCount = -1;
     _onItemChange();
   }
 
@@ -117,13 +129,21 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
     for (var controller in _itemControllers) {
       _syncItemControllerListeners(controller);
     }
+    // Invalidate cache
+    _cachedValues = null;
+    _cachedItemCount = -1;
     final values = _getValues();
     valueNotifier.value = values;
     listener(values);
   }
 
   List<Map<String, dynamic>> _getValues() {
-    return _itemControllers.map((controller) {
+    // Use cache if item count hasn't changed
+    if (_cachedValues != null && _cachedItemCount == _itemControllers.length) {
+      return _cachedValues!;
+    }
+    
+    final values = _itemControllers.map((controller) {
       final values = controller.getValues();
       // Deep copy and ensure all nested objects are converted to Map<String, dynamic>
       // This handles cases where form values might contain custom objects
@@ -135,6 +155,11 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
         })
       );
     }).toList();
+    
+    // Update cache
+    _cachedValues = values;
+    _cachedItemCount = _itemControllers.length;
+    return values;
   }
 
   dynamic _convertToJsonCompatible(dynamic value) {
@@ -191,6 +216,23 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
       return isValid!(value);
     }
     return true;
+  }
+
+  @override
+  String errorMessage(List<Map<String, dynamic>>? value) {
+    if (errorMessageText != null) return errorMessageText!;
+    final loc = localizations ?? DefaultFormLocalizations();
+    
+    if (value != null) {
+      if (minItems != null && value.length < minItems!) {
+        return loc.minItemsErrorMessage(minItems!);
+      }
+      if (maxItems != null && value.length > maxItems!) {
+        return loc.maxItemsErrorMessage(maxItems!);
+      }
+    }
+    
+    return loc.arrayFormErrorMessage;
   }
 
   @override

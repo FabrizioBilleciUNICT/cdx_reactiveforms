@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../forms/base_form.dart';
 import '../models/dropdown_item.dart';
 import '../models/disposable.dart';
+import '../models/form_localizations.dart';
 import '../models/types.dart';
 
 class SelectableForm<K> extends BaseForm<List<K>, List<K>> with Disposable {
@@ -35,7 +36,11 @@ class SelectableForm<K> extends BaseForm<List<K>, List<K>> with Disposable {
     super.errorNotifier,
     super.showErrorNotifier,
     super.themeData,
-    super.errorMessageText = 'Please select at least one value',
+    super.errorMessageText,
+    super.localizations,
+    super.semanticsLabel,
+    super.tooltip,
+    super.hintText,
     this.minSize = 1,
     this.maxSize = 1,
   }) : _initialValue = List.from(initialValue),
@@ -58,7 +63,36 @@ class SelectableForm<K> extends BaseForm<List<K>, List<K>> with Disposable {
 
   @override
   bool validate(List<K>? value) {
-    return !isRequired || (value != null && value.isNotEmpty && (isValid == null || isValid!(value)));
+    if (!isRequired) return true;
+    if (value == null || value.isEmpty) {
+      return minSize == null || minSize! == 0;
+    }
+    
+    if (minSize != null && value.length < minSize!) {
+      return false;
+    }
+    if (maxSize != null && value.length > maxSize!) {
+      return false;
+    }
+    
+    return isValid == null || isValid!(value);
+  }
+
+  @override
+  String errorMessage(List<K>? value) {
+    if (errorMessageText != null) return errorMessageText!;
+    final loc = localizations ?? DefaultFormLocalizations();
+    
+    if (value != null) {
+      if (minSize != null && value.length < minSize!) {
+        return loc.minSelectionErrorMessage(minSize!);
+      }
+      if (maxSize != null && value.length > maxSize!) {
+        return loc.maxSelectionErrorMessage(maxSize!);
+      }
+    }
+    
+    return loc.defaultErrorMessage;
   }
 
   @override

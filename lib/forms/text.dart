@@ -1,4 +1,5 @@
 
+import 'dart:async';
 import 'package:cdx_reactiveforms/ui/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,6 +19,8 @@ class TextForm<K> extends BaseForm<String, K> with Disposable {
   final int? maxLines;
   final void Function(String?)? onChange;
   late final ValueNotifier<bool> hideText;
+  final Duration? validationDebounce;
+  Timer? _debounceTimer;
 
   TextForm({
     required super.hint,
@@ -42,6 +45,11 @@ class TextForm<K> extends BaseForm<String, K> with Disposable {
     bool initialHideText = false,
     this.onChange,
     super.errorMessageText,
+    super.localizations,
+    super.semanticsLabel,
+    super.tooltip,
+    super.hintText,
+    this.validationDebounce,
   }) : super() {
     _controller = TextEditingController(text: outputTransform(initialValue));
     _initialValue = outputTransform(initialValue) ?? '';
@@ -69,8 +77,28 @@ class TextForm<K> extends BaseForm<String, K> with Disposable {
 
   @override
   void listener(String? value) {
-    super.listener(value);
+    // Update value immediately for UI responsiveness
+    valueNotifier.value = inputTransform(value);
     onChange?.call(value ?? '');
+    
+    // Debounce validation if specified
+    if (validationDebounce != null) {
+      _debounceTimer?.cancel();
+      _debounceTimer = Timer(validationDebounce!, () {
+        // Perform validation after debounce delay
+        final bool valid = validate(value);
+        if (!valid) {
+          final errorMsg = errorMessage(value);
+          errorNotifier.value = errorMsg;
+          errorLogger?.logValidationError(type.toString(), label, errorMsg);
+        } else {
+          errorNotifier.value = '';
+        }
+      });
+    } else {
+      // No debouncing, validate immediately
+      super.listener(value);
+    }
   }
 
   @override
@@ -108,7 +136,9 @@ class TextForm<K> extends BaseForm<String, K> with Disposable {
   @override
   void onTap(BuildContext context, TextEditingController controller) {}
 
+  @override
   void dispose() {
+    _debounceTimer?.cancel();
     _controller.dispose();
     hideText.dispose();
   }

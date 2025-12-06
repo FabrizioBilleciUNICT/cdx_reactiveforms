@@ -3,11 +3,12 @@ import 'dart:io';
 import 'package:cdx_core/injector.dart';
 import 'package:cdx_reactiveforms/forms/base_form.dart';
 import 'package:cdx_reactiveforms/models/disposable.dart';
+import 'package:cdx_reactiveforms/models/form_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/types.dart';
 
 class FileForm extends BaseForm<String?, String?> with Disposable {
-  final String messageError;
+  final String? messageError;
   final List<String>? allowedExtensions;
   final int? maxSizeBytes;
   final Future<File?> Function()? filePicker;
@@ -23,7 +24,7 @@ class FileForm extends BaseForm<String?, String?> with Disposable {
     super.editable = true,
     super.visible,
     required String? initialValue,
-    required this.messageError,
+    this.messageError,
     this.allowedExtensions,
     this.maxSizeBytes,
     this.filePicker,
@@ -32,6 +33,10 @@ class FileForm extends BaseForm<String?, String?> with Disposable {
     super.errorNotifier,
     super.showErrorNotifier,
     super.themeData,
+    super.localizations,
+    super.semanticsLabel,
+    super.tooltip,
+    super.hintText,
   }) : _initialValue = initialValue,
         super(
     minValue: null,
@@ -84,7 +89,8 @@ class FileForm extends BaseForm<String?, String?> with Disposable {
         if (allowedExtensions != null && allowedExtensions!.isNotEmpty) {
           final extension = file.path.split('.').last.toLowerCase();
           if (!allowedExtensions!.any((ext) => ext.toLowerCase() == extension)) {
-            errorNotifier.value = 'File extension not allowed. Allowed: ${allowedExtensions!.join(", ")}';
+            final loc = localizations ?? DefaultFormLocalizations();
+            errorNotifier.value = loc.fileExtensionErrorMessage(allowedExtensions!);
             showError(true);
             return;
           }
@@ -94,8 +100,9 @@ class FileForm extends BaseForm<String?, String?> with Disposable {
         if (maxSizeBytes != null) {
           final fileSize = await file.length();
           if (fileSize > maxSizeBytes!) {
-            final maxSizeMB = (maxSizeBytes! / (1024 * 1024)).toStringAsFixed(2);
-            errorNotifier.value = 'File size exceeds maximum allowed size of ${maxSizeMB}MB';
+            final maxSizeMB = maxSizeBytes! / (1024 * 1024);
+            final loc = localizations ?? DefaultFormLocalizations();
+            errorNotifier.value = loc.fileSizeErrorMessage(maxSizeMB);
             showError(true);
             return;
           }
@@ -125,7 +132,7 @@ class FileForm extends BaseForm<String?, String?> with Disposable {
 
   @override
   String errorMessage(String? value) {
-    return messageError;
+    return messageError ?? (localizations ?? DefaultFormLocalizations()).defaultErrorMessage;
   }
 
   Future<void> _handleDroppedFile(File file) async {

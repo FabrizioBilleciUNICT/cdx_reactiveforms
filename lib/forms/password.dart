@@ -2,13 +2,14 @@
 import 'package:cdx_core/injector.dart';
 import 'package:cdx_core/utils/extensions.dart';
 import 'package:cdx_reactiveforms/forms/text.dart';
+import 'package:cdx_reactiveforms/models/form_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../models/types.dart';
 
 class PasswordForm extends TextForm<String> {
 
-  final String messageError;
+  final String? messageError;
 
   PasswordForm({
     required super.hint,
@@ -21,8 +22,12 @@ class PasswordForm extends TextForm<String> {
     required super.initialValue,
     super.minValue = '',
     super.maxValue = '',
-    required this.messageError,
+    this.messageError,
     super.onChange,
+    super.localizations,
+    super.semanticsLabel,
+    super.tooltip,
+    super.hintText,
   }) : super(
       errorNotifier: ValueNotifier(''),
       formatters: [],
@@ -64,7 +69,7 @@ class PasswordForm extends TextForm<String> {
 
   @override
   String errorMessage(String? value) {
-    return messageError;
+    return messageError ?? (localizations ?? DefaultFormLocalizations()).passwordErrorMessage;
   }
 
 }
