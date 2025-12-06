@@ -8,6 +8,7 @@ enum FormsType {
   number,
   intNumber,
   date,
+  time,
   boolean,
   dropdown,
   multiselect,

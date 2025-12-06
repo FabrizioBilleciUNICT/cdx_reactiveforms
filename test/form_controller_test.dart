@@ -14,6 +14,11 @@ import 'package:cdx_reactiveforms/forms/numeric.dart';
 import 'package:cdx_reactiveforms/forms/password.dart';
 import 'package:cdx_reactiveforms/forms/radio.dart';
 import 'package:cdx_reactiveforms/forms/text.dart';
+import 'package:cdx_reactiveforms/forms/time.dart';
+import 'package:cdx_reactiveforms/forms/url.dart';
+import 'package:cdx_reactiveforms/forms/phone.dart';
+import 'package:cdx_reactiveforms/forms/file.dart';
+import 'package:cdx_reactiveforms/forms/image.dart';
 import 'package:cdx_reactiveforms/models/dropdown_item.dart';
 import 'test_helpers.dart';
 
@@ -578,6 +583,176 @@ void main() {
       expect(formController.forms.containsKey('newField1'), true);
       expect(formController.forms.containsKey('newField2'), true);
       expect(formController.forms.containsKey('textField'), false);
+    });
+
+    test('Form should handle time field', () {
+      final timeForm = TimeForm(
+        hint: 'Select time',
+        label: 'Time',
+        initialValue: null,
+        outputFormat: 'HH:mm',
+        isRequired: false,
+        minTime: '09:00',
+        maxTime: '18:00',
+      );
+
+      // Optional field, null should be valid
+      expect(timeForm.validate(null), true);
+
+      // Valid time within range
+      timeForm.changeValue('12:30');
+      expect(timeForm.currentValue(), '12:30');
+      expect(timeForm.validate('12:30'), true);
+
+      // Time outside range
+      timeForm.changeValue('08:00');
+      expect(timeForm.validate('08:00'), false);
+
+      // Invalid format
+      expect(timeForm.validate('25:00'), false);
+      expect(timeForm.validate('12:60'), false);
+      expect(timeForm.validate('invalid'), false);
+    });
+
+    test('Form should handle URL field', () {
+      final urlForm = URLForm(
+        hint: 'Enter URL',
+        label: 'URL',
+        initialValue: null,
+        messageError: 'Invalid URL',
+        isRequired: false,
+      );
+
+      // Optional field, null should be valid
+      expect(urlForm.validate(null), true);
+
+      // Valid URLs
+      urlForm.changeValue('https://example.com');
+      expect(urlForm.validate('https://example.com'), true);
+      expect(urlForm.inputTransform('https://example.com'), 'https://example.com');
+
+      urlForm.changeValue('http://test.org/path');
+      expect(urlForm.validate('http://test.org/path'), true);
+
+      // URL without protocol should be transformed
+      urlForm.changeValue('example.com');
+      expect(urlForm.inputTransform('example.com'), 'https://example.com');
+      expect(urlForm.validate('example.com'), true);
+
+      // Invalid URLs
+      expect(urlForm.validate('not a url'), false);
+      expect(urlForm.validate('ftp://invalid'), false);
+    });
+
+    test('Form should handle phone field', () {
+      final phoneForm = PhoneForm(
+        hint: 'Enter phone',
+        label: 'Phone',
+        initialValue: null,
+        messageError: 'Invalid phone',
+        countryCode: '+39',
+        isRequired: false,
+      );
+
+      // Optional field, null should be valid
+      expect(phoneForm.validate(null), true);
+
+      // Valid phone numbers
+      phoneForm.changeValue('+39 123 456 7890');
+      expect(phoneForm.validate('+39 123 456 7890'), true);
+
+      phoneForm.changeValue('1234567890');
+      expect(phoneForm.validate('1234567890'), true);
+
+      // Phone with country code transformation
+      phoneForm.changeValue('1234567890');
+      expect(phoneForm.inputTransform('1234567890'), '+391234567890');
+
+      // Invalid phone numbers
+      expect(phoneForm.validate('123'), false); // Too short
+      expect(phoneForm.validate('12345678901234567890'), false); // Too long
+      expect(phoneForm.validate('abc'), false); // Not digits
+    });
+
+    test('Form should handle file field', () {
+      final fileForm = FileForm(
+        hint: 'Select file',
+        label: 'File',
+        initialValue: null,
+        messageError: 'Invalid file',
+        allowedExtensions: ['pdf', 'doc'],
+        maxSizeBytes: 1024 * 1024, // 1MB
+        isRequired: false,
+      );
+
+      // Optional field, null should be valid
+      expect(fileForm.validate(null), true);
+
+      // File path validation (file doesn't exist in test)
+      // When not required, empty string is valid
+      fileForm.changeValue('');
+      expect(fileForm.validate(''), true);
+
+      // When required, file must exist
+      final requiredFileForm = FileForm(
+        hint: 'Select file',
+        label: 'File',
+        initialValue: null,
+        messageError: 'Invalid file',
+        isRequired: true,
+      );
+      expect(requiredFileForm.validate(null), false);
+      expect(requiredFileForm.validate(''), false);
+
+      // Test clear and reset
+      fileForm.clear();
+      expect(fileForm.currentValue(), null);
+
+      fileForm.changeValue('/test/file.pdf');
+      fileForm.reset();
+      expect(fileForm.currentValue(), null);
+    });
+
+    test('Form should handle image field', () {
+      final imageForm = ImageForm(
+        hint: 'Select image',
+        label: 'Image',
+        initialValue: null,
+        messageError: 'Invalid image',
+        allowedFormats: ['jpg', 'png'],
+        maxSizeBytes: 2 * 1024 * 1024, // 2MB
+        isRequired: false,
+      );
+
+      // Optional field, null should be valid
+      expect(imageForm.validate(null), true);
+
+      // When not required, empty string is valid
+      imageForm.changeValue('');
+      expect(imageForm.validate(''), true);
+
+      // When required, image must exist and have valid extension
+      final requiredImageForm = ImageForm(
+        hint: 'Select image',
+        label: 'Image',
+        initialValue: null,
+        messageError: 'Invalid image',
+        allowedFormats: ['jpg', 'png'],
+        isRequired: true,
+      );
+      expect(requiredImageForm.validate(null), false);
+      expect(requiredImageForm.validate(''), false);
+
+      // Invalid extension (even if file doesn't exist, extension check happens first)
+      expect(requiredImageForm.validate('/path/to/file.gif'), false);
+
+      // Test clear and reset
+      imageForm.clear();
+      expect(imageForm.currentValue(), null);
+
+      imageForm.changeValue('/test/image.jpg');
+      imageForm.reset();
+      expect(imageForm.currentValue(), null);
     });
   });
 }
