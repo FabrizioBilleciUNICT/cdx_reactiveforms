@@ -33,22 +33,49 @@ class URLForm extends TextForm<String> {
   bool _isValidUrl(String? url) {
     if (url == null || url.isEmpty) return false;
     
-    // Basic URL validation pattern
+    // IP address pattern (IPv4)
+    final ipPattern = RegExp(
+      r'^https?://' // http:// or https://
+      r'(\d{1,3}\.){3}\d{1,3}' // IPv4 address
+      r'(:\d+)?' // optional port
+      r'(/.*)?$', // optional path
+      caseSensitive: false,
+    );
+    
+    // localhost pattern
+    final localhostPattern = RegExp(
+      r'^https?://' // http:// or https://
+      r'localhost' // localhost
+      r'(:\d+)?' // optional port
+      r'(/.*)?$', // optional path
+      caseSensitive: false,
+    );
+    
+    // Basic URL validation pattern for domains
     final urlPattern = RegExp(
       r'^https?://' // http:// or https://
       r'([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}' // domain
+      r'(:\d+)?' // optional port
       r'(/.*)?$', // optional path
       caseSensitive: false,
     );
     
     // Also accept URLs without protocol (will be added automatically)
     final urlWithoutProtocol = RegExp(
-      r'^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}' // domain
+      r'^('
+      r'([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}' // domain
+      r'|localhost' // localhost
+      r'|(\d{1,3}\.){3}\d{1,3}' // IPv4
+      r')'
+      r'(:\d+)?' // optional port
       r'(/.*)?$', // optional path
       caseSensitive: false,
     );
     
-    return urlPattern.hasMatch(url) || urlWithoutProtocol.hasMatch(url);
+    return urlPattern.hasMatch(url) || 
+           urlWithoutProtocol.hasMatch(url) ||
+           ipPattern.hasMatch(url) ||
+           localhostPattern.hasMatch(url);
   }
 
   @override

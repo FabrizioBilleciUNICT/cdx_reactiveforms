@@ -22,8 +22,6 @@ import 'package:cdx_reactiveforms/forms/text.dart';
 import 'package:cdx_reactiveforms/forms/time.dart';
 import 'package:cdx_reactiveforms/forms/url.dart';
 import 'package:cdx_reactiveforms/forms/phone.dart';
-import 'package:cdx_reactiveforms/forms/file.dart';
-import 'package:cdx_reactiveforms/forms/image.dart';
 import 'package:cdx_reactiveforms/models/dropdown_item.dart';
 import 'package:cdx_reactiveforms/ui/layout_simple.dart';
 import 'package:cdx_core/utils/extensions.dart';
@@ -280,34 +278,6 @@ class _FormsExamplePageState extends State<FormsExamplePage> {
         countryCode: '+39',
         isRequired: false,
       ),
-      'fileField': FileForm(
-        hint: 'Select a document',
-        label: 'Document',
-        initialValue: null,
-        messageError: 'Please select a valid file',
-        allowedExtensions: ['pdf', 'doc', 'docx', 'txt'],
-        maxSizeBytes: 5 * 1024 * 1024, // 5MB
-        filePicker: () async {
-          // Mock file picker - in real app, use file_picker package
-          // For example purposes, return null
-          return null;
-        },
-        isRequired: false,
-      ),
-      'imageField': ImageForm(
-        hint: 'Select a profile image',
-        label: 'Profile Image',
-        initialValue: null,
-        messageError: 'Please select a valid image',
-        allowedFormats: ['jpg', 'jpeg', 'png'],
-        maxSizeBytes: 2 * 1024 * 1024, // 2MB
-        imagePicker: () async {
-          // Mock image picker - in real app, use image_picker package
-          // For example purposes, return null
-          return null;
-        },
-        isRequired: false,
-      ),
     });
   }
 
@@ -461,6 +431,10 @@ class _FormsExamplePageState extends State<FormsExamplePage> {
         phoneNumbersForm.changeValue(phoneNumbersData);
       }
     }
+    
+    (forms['timeField'] as TimeForm?)?.changeValue(model.preferredTime ?? '');
+    (forms['urlField'] as URLForm?)?.changeValue(model.website ?? '');
+    (forms['phoneField'] as PhoneForm?)?.changeValue(model.phoneNumber ?? '');
   }
 
   Widget _buildActionButtons() {

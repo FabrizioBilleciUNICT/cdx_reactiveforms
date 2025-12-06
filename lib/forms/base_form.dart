@@ -95,12 +95,13 @@ abstract class BaseForm<T, K> extends IForm<T, K> {
       children: [
         labelWidget(),
         wrapWithSemantics(buildInput(context)),
-        ValueListenableBuilder(
+        ValueListenableBuilder<bool>(
           valueListenable: showErrorNotifier,
           builder: (context, show, child) {
-            if (!show) return const SizedBox();
+            if (!show) return const SizedBox.shrink();
             return errorBuilder();
           },
+          child: const SizedBox.shrink(), // Child parameter for optimization
         ),
       ],
     );

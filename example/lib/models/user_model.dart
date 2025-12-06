@@ -115,6 +115,15 @@ class UserModel {
   @JsonKey(name: 'phoneNumbers')
   final List<PhoneNumberModel> phoneNumbers;
 
+  @JsonKey(name: 'timeField')
+  final String? preferredTime;
+
+  @JsonKey(name: 'urlField')
+  final String? website;
+
+  @JsonKey(name: 'phoneField')
+  final String? phoneNumber;
+
   UserModel({
     this.fullName,
     this.bio,
@@ -130,6 +139,9 @@ class UserModel {
     this.hobbies = const [],
     this.address,
     this.phoneNumbers = const [],
+    this.preferredTime,
+    this.website,
+    this.phoneNumber,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
@@ -169,6 +181,9 @@ class UserModel {
     String? country,
     List<String>? hobbies,
     AddressModel? address,
+    String? preferredTime,
+    String? website,
+    String? phoneNumber,
   }) {
     return UserModel(
       fullName: fullName ?? this.fullName,
@@ -177,13 +192,16 @@ class UserModel {
       password: password ?? this.password,
       age: age ?? this.age,
       weight: weight ?? this.weight,
-    birthDate: birthDate ?? this.birthDate,
-    termsAccepted: termsAccepted ?? this.termsAccepted,
-    newsletter: newsletter ?? this.newsletter,
-    gender: gender ?? this.gender,
-    country: country ?? this.country,
+      birthDate: birthDate ?? this.birthDate,
+      termsAccepted: termsAccepted ?? this.termsAccepted,
+      newsletter: this.newsletter,
+      gender: gender ?? this.gender,
+      country: country ?? this.country,
       hobbies: hobbies ?? this.hobbies,
       address: address ?? this.address,
+      preferredTime: preferredTime ?? this.preferredTime,
+      website: website ?? this.website,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
     );
   }
 
@@ -210,6 +228,9 @@ class UserModel {
         PhoneNumberModel(type: 'Mobile', number: '+39 123 456 7890'),
         PhoneNumberModel(type: 'Home', number: '+39 02 1234 5678'),
       ],
+      preferredTime: '14:30',
+      website: 'https://www.example.com',
+      phoneNumber: '+39 123 456 7890',
     );
   }
 

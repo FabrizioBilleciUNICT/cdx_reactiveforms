@@ -41,7 +41,15 @@ class DropdownForm<K> extends BaseForm<K, K> with Disposable {
       if (list.isNotEmpty) {
         _optionsNotifier.value = list;
       }
-      if (!list.any((item) => item.value == _currentValue)) {
+      // Early return optimization: check if current value exists in new list
+      bool valueExists = false;
+      for (var item in list) {
+        if (item.value == _currentValue) {
+          valueExists = true;
+          break;
+        }
+      }
+      if (!valueExists) {
         _currentValue = null;
         valueNotifier.value = null;
         errorNotifier.value = '';
@@ -109,7 +117,7 @@ class DropdownForm<K> extends BaseForm<K, K> with Disposable {
         ValueListenableBuilder(
           valueListenable: showErrorNotifier,
           builder: (context, show, child) {
-            if (!show) return const SizedBox();
+            if (!show) return const SizedBox.shrink();
             return errorBuilder();
           }
         )

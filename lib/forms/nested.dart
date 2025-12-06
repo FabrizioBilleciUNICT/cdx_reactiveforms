@@ -187,7 +187,7 @@ class NestedForm extends BaseForm<Map<String, dynamic>, Map<String, dynamic>> wi
       valueListenable: form.errorNotifier,
       builder: (context, value, child) => value.isNotEmpty
           ? Text(value, style: DI.theme().inputTheme.errorTextStyle)
-          : const SizedBox(),
+          : const SizedBox.shrink(),
     );
   }
 

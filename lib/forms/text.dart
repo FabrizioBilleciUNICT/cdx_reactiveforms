@@ -114,6 +114,10 @@ class TextForm<K> extends BaseForm<String, K> with Disposable {
   @override
   void changeValue(String? newValue) {
     _controller.text = newValue ?? '';
+    // Also update valueNotifier to keep it in sync
+    valueNotifier.value = inputTransform(newValue);
+    // Trigger listener to validate and update state
+    listener(newValue);
   }
 
   @override

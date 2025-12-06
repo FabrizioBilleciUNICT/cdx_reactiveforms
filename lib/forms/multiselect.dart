@@ -51,8 +51,18 @@ class SelectableForm<K> extends BaseForm<List<K>, List<K>> with Disposable {
       if (list.isNotEmpty) {
         _optionsNotifier.value = list;
       }
-      _selectedValues.removeWhere((sel) => !list.any((opt) => opt.value == sel));
-      valueNotifier.value = List.from(_selectedValues);
+      // Optimize: use Set for O(1) lookup instead of O(n) any() check
+      final validValues = <K>{};
+      for (var opt in list) {
+        validValues.add(opt.value);
+      }
+      final oldLength = _selectedValues.length;
+      _selectedValues.removeWhere((sel) => !validValues.contains(sel));
+      // Only update if selection actually changed
+      final currentValueLength = valueNotifier.value?.length ?? 0;
+      if (oldLength != _selectedValues.length || currentValueLength != _selectedValues.length) {
+        valueNotifier.value = List.from(_selectedValues);
+      }
     });
   }
 
@@ -148,7 +158,7 @@ class SelectableForm<K> extends BaseForm<List<K>, List<K>> with Disposable {
         ValueListenableBuilder(
           valueListenable: showErrorNotifier,
           builder: (context, show, child) {
-            if (!show) return const SizedBox();
+            if (!show) return const SizedBox.shrink();
             return errorBuilder();
           },
         ),

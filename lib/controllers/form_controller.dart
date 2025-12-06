@@ -23,6 +23,14 @@ class FormController<T> {
   }
 
   void _updateValidStatus() {
+    // Early return if no forms
+    if (_formMap.isEmpty) {
+      if (isValid.value != true) {
+        isValid.value = true;
+      }
+      return;
+    }
+    
     bool overallValid = true;
     for (var form in _formMap.values) {
       if (!_isValid(form)) {

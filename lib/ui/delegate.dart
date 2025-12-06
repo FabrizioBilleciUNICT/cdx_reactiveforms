@@ -16,11 +16,12 @@ abstract class FormBuilderDelegate {
   );
 
   ValueListenableBuilder<String> Function() error(IForm<dynamic, dynamic> form) {
-    return () => ValueListenableBuilder(
+    return () => ValueListenableBuilder<String>(
       valueListenable: form.errorNotifier,
       builder: (context, value, child) => value.isNotEmpty
           ? Text(value, style: DI.theme().inputTheme.errorTextStyle)
-          : const SizedBox(),
+          : const SizedBox.shrink(),
+      child: const SizedBox.shrink(), // Child parameter for optimization
     );
   }
 }

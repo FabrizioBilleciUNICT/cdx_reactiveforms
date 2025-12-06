@@ -53,6 +53,9 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
           ?.map((e) => PhoneNumberModel.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  preferredTime: json['timeField'] as String?,
+  website: json['urlField'] as String?,
+  phoneNumber: json['phoneField'] as String?,
 );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
@@ -70,4 +73,7 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'multiselectField': instance.hobbies,
   'address': instance.address,
   'phoneNumbers': instance.phoneNumbers,
+  'timeField': instance.preferredTime,
+  'urlField': instance.website,
+  'phoneField': instance.phoneNumber,
 };

@@ -125,10 +125,24 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
   }
 
   void _onItemChange() {
-    // Sync listeners for all item controllers in case forms were added dynamically
+    // Only sync listeners if form count might have changed (lazy sync)
+    // This avoids unnecessary work on every value change
+    bool needsSync = false;
     for (var controller in _itemControllers) {
-      _syncItemControllerListeners(controller);
+      final currentCount = controller.forms.length;
+      final lastCount = _itemControllerFormCounts[controller] ?? 0;
+      if (currentCount != lastCount) {
+        needsSync = true;
+        break;
+      }
     }
+    
+    if (needsSync) {
+      for (var controller in _itemControllers) {
+        _syncItemControllerListeners(controller);
+      }
+    }
+    
     // Invalidate cache
     _cachedValues = null;
     _cachedItemCount = -1;
@@ -156,10 +170,10 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
       );
     }).toList();
     
-    // Update cache
-    _cachedValues = values;
+    // Update cache with unmodifiable list for safety
+    _cachedValues = List.unmodifiable(values);
     _cachedItemCount = _itemControllers.length;
-    return values;
+    return _cachedValues!;
   }
 
   dynamic _convertToJsonCompatible(dynamic value) {
@@ -416,7 +430,7 @@ class ArrayForm extends BaseForm<List<Map<String, dynamic>>, List<Map<String, dy
       valueListenable: form.errorNotifier,
       builder: (context, value, child) => value.isNotEmpty
           ? Text(value, style: DI.theme().inputTheme.errorTextStyle)
-          : const SizedBox(),
+          : const SizedBox.shrink(),
     );
   }
 
