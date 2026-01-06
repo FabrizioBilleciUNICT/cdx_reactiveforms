@@ -11,6 +11,7 @@ class DateForm extends TextForm<String> {
 
   final bool readOnly;
   final String outputFormat;
+  final DateTime? initialDate;
   DateForm({
     required super.hint,
     required super.label,
@@ -23,7 +24,8 @@ class DateForm extends TextForm<String> {
     required this.outputFormat,
     this.readOnly = false,
     DateTime? minDate,
-    DateTime? maxDate
+    DateTime? maxDate,
+    this.initialDate,
   }) : super(
     errorNotifier: ValueNotifier(''),
     formatters: [],
@@ -41,9 +43,11 @@ class DateForm extends TextForm<String> {
   @override
   void onTap(BuildContext context, TextEditingController controller) async {
     if (readOnly) return;
+    final parsedDate = _parseDate(controller.text);
+    final dateForPicker = initialDate ?? parsedDate ?? DateTime.now();
     DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: _parseDate(controller.text) ?? _minDate,
+      initialDate: dateForPicker,
       firstDate: _minDate,
       lastDate: _maxDate,
       builder: (context, child) {
