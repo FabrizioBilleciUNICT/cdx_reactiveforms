@@ -10,7 +10,7 @@ enum FormsType {
   date,
   time,
   boolean,
-  dropdown,
+  dropdown,       //
   multiselect,
   nested,
   image,
@@ -18,8 +18,8 @@ enum FormsType {
   checkArray,
   customArray,
   dragArray,
-  checkbox,
-  radio,
+  checkbox,       //
+  radio,          //
   none,
   custom
 }
