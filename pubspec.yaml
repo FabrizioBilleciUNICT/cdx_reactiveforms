@@ -1,7 +1,8 @@
 name: cdx_reactiveforms
 description: "Reactive Forms by Codedix"
-version: 0.0.1
-homepage:
+version: 0.0.2
+homepage: https://github.com/FabrizioBilleciUNICT/cdx_reactiveforms
+repository: https://github.com/FabrizioBilleciUNICT/cdx_reactiveforms
 
 environment:
   sdk: ^3.7.0
@@ -11,13 +12,13 @@ dependencies:
   flutter:
     sdk: flutter
 
-  cdx_core:
-    path: ../cdx_core
+  cdx_core: ^0.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  get_it: ^8.0.3
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

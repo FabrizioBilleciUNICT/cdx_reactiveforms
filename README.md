@@ -1,4 +1,16 @@
+<div align="center">
+  <img src="https://raw.githubusercontent.com/FabrizioBilleciUNICT/cdx_reactiveforms/master/cdx_reactiveforms.png" alt="CdxReactiveForms Logo" width="400">
+</div>
+
+<div align="center">
+
 # CDX Reactive Forms
+
+[![pub package](https://img.shields.io/pub/v/cdx_reactiveforms.svg)](https://pub.dev/packages/cdx_reactiveforms)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Flutter](https://img.shields.io/badge/Flutter-%3E%3D1.17.0-blue.svg)](https://flutter.dev)
+
+</div>
 
 A powerful, type-safe, and highly customizable reactive forms library for Flutter. Built with performance and developer experience in mind, CDX Reactive Forms provides a comprehensive set of form controls with built-in validation, error handling, and JSON serialization support.
 
