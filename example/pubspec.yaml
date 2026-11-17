@@ -28,3 +28,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+dependency_overrides:
+  cdx_core:
+    path: ../../cdx_core
