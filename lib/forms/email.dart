@@ -1,4 +1,3 @@
-
 import 'package:cdx_core/utils/extensions.dart';
 import 'package:cdx_reactiveforms/forms/text.dart';
 import 'package:cdx_reactiveforms/models/form_localizations.dart';
@@ -7,7 +6,6 @@ import 'package:flutter/material.dart';
 import '../models/types.dart';
 
 class EmailForm extends TextForm<String> {
-
   final String? messageError;
 
   EmailForm({
@@ -27,18 +25,19 @@ class EmailForm extends TextForm<String> {
     super.semanticsLabel,
     super.tooltip,
     super.hintText,
-  }) : super(
-      formatters: [],
-      inputType: TextInputType.emailAddress
-  );
+    super.autofillHints,
+    super.textInputAction,
+  }) : super(formatters: [], inputType: TextInputType.emailAddress);
 
   @override
   bool validate(String? value) {
-    return !isRequired || (super.validate(value) && value?.isValidEmail() == true);
+    return !isRequired ||
+        (super.validate(value) && value?.isValidEmail() == true);
   }
 
   @override
   String errorMessage(String? value) {
-    return messageError ?? (localizations ?? DefaultFormLocalizations()).emailErrorMessage;
+    return messageError ??
+        (localizations ?? DefaultFormLocalizations()).emailErrorMessage;
   }
 }

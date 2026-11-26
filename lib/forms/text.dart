@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'package:cdx_reactiveforms/ui/components.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +8,6 @@ import '../models/types.dart';
 import 'base_form.dart';
 
 class TextForm<K> extends BaseForm<String, K> with Disposable {
-
   late final TextEditingController _controller;
   late final String _initialValue;
   final List<TextInputFormatter> formatters;
@@ -21,6 +19,8 @@ class TextForm<K> extends BaseForm<String, K> with Disposable {
   late final ValueNotifier<bool> hideText;
   final Duration? validationDebounce;
   Timer? _debounceTimer;
+  final Iterable<String>? autofillHints;
+  final TextInputAction? textInputAction;
 
   TextForm({
     required super.hint,
@@ -50,6 +50,8 @@ class TextForm<K> extends BaseForm<String, K> with Disposable {
     super.tooltip,
     super.hintText,
     this.validationDebounce,
+    this.autofillHints,
+    this.textInputAction,
   }) : super() {
     _controller = TextEditingController(text: outputTransform(initialValue));
     _initialValue = outputTransform(initialValue) ?? '';
@@ -80,7 +82,7 @@ class TextForm<K> extends BaseForm<String, K> with Disposable {
     // Update value immediately for UI responsiveness
     valueNotifier.value = inputTransform(value);
     onChange?.call(value ?? '');
-    
+
     // Debounce validation if specified
     if (validationDebounce != null) {
       _debounceTimer?.cancel();
@@ -153,7 +155,7 @@ class TextForm<K> extends BaseForm<String, K> with Disposable {
       valueListenable: hideText,
       builder: (context, obscureText, child) {
         return input(context, obscureText);
-      }
+      },
     );
   }
 
@@ -170,18 +172,27 @@ class TextForm<K> extends BaseForm<String, K> with Disposable {
             readOnly: !editable,
             onTap: () => onTap(context, _controller),
             inputFormatters: formatters,
-            keyboardType: TextInputType.text,
+            keyboardType: inputType,
+            textInputAction: textInputAction,
+            autofillHints: autofillHints,
+            autocorrect:
+                !obscureText && inputType != TextInputType.emailAddress,
+            enableSuggestions: !obscureText,
             cursorColor: theme.cursorColor,
             style: theme.textStyle,
             showCursor: editable && type != FormsType.date,
             obscureText: obscureText,
-            decoration: FormComponents.inputDecoration(theme, hint, editable).copyWith(
+            decoration: FormComponents.inputDecoration(
+              theme,
+              hint,
+              editable,
+            ).copyWith(
               suffixIcon: suffix(changeValue),
               prefixIcon: prefix(changeValue),
             ),
           ),
         ),
-        actionWidget()
+        actionWidget(),
       ],
     );
   }

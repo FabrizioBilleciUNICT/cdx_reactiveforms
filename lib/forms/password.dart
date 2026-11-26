@@ -1,4 +1,3 @@
-
 import 'package:cdx_core/injector.dart';
 import 'package:cdx_core/utils/extensions.dart';
 import 'package:cdx_reactiveforms/forms/text.dart';
@@ -8,7 +7,6 @@ import 'package:flutter/material.dart';
 import '../models/types.dart';
 
 class PasswordForm extends TextForm<String> {
-
   final String? messageError;
 
   PasswordForm({
@@ -28,25 +26,26 @@ class PasswordForm extends TextForm<String> {
     super.semanticsLabel,
     super.tooltip,
     super.hintText,
+    super.autofillHints,
+    super.textInputAction,
   }) : super(
-      errorNotifier: ValueNotifier(''),
-      formatters: [],
-      inputType: TextInputType.text,
-      initialHideText: true
-  );
+         errorNotifier: ValueNotifier(''),
+         formatters: [],
+         inputType: TextInputType.text,
+         initialHideText: true,
+       );
 
   @override
   bool validate(String? value) {
-    return !isRequired || (super.validate(value) && value?.isValidPassword() == true);
+    return !isRequired ||
+        (super.validate(value) && value?.isValidPassword() == true);
   }
 
   @override
   Widget prefix(void Function(String p1) onAction) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
-      child: Icon(Icons.lock_rounded,
-          color: DI.colors().primary
-      ),
+      child: Icon(Icons.lock_rounded, color: DI.colors().primary),
     );
   }
 
@@ -58,10 +57,11 @@ class PasswordForm extends TextForm<String> {
         onTap: () {
           hideText.value = !hideText.value;
         },
-        child: Icon(hideText.value
-            ? Icons.visibility_off_rounded
-            : Icons.visibility_rounded,
-            color: DI.colors().primary
+        child: Icon(
+          hideText.value
+              ? Icons.visibility_off_rounded
+              : Icons.visibility_rounded,
+          color: DI.colors().primary,
         ),
       ),
     );
@@ -69,7 +69,7 @@ class PasswordForm extends TextForm<String> {
 
   @override
   String errorMessage(String? value) {
-    return messageError ?? (localizations ?? DefaultFormLocalizations()).passwordErrorMessage;
+    return messageError ??
+        (localizations ?? DefaultFormLocalizations()).passwordErrorMessage;
   }
-
 }
